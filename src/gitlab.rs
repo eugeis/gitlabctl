@@ -1,12 +1,12 @@
 use serde::{Serialize, Deserialize};
-use serde_yaml;
+
 use gitlab::api::{ApiError, groups};
 use gitlab::api::groups::subgroups;
 use gitlab::{Gitlab, GitlabError, RestError};
 use gitlab::api::Query;
 use gitlab::types::Group;
 use gitlab::types::GroupDetail;
-use std::fs;
+
 use std::collections::HashSet;
 use std::path::Path;
 use log::{info, warn};
