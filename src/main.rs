@@ -2,8 +2,8 @@ mod gitlab;
 mod writer;
 mod common;
 
-use serde_yaml;
-use std::fs;
+
+
 use clap::Parser;
 use crate::writer::YamlModelWriter;
 
@@ -35,7 +35,7 @@ fn main() {
     let writer = YamlModelWriter{
         output_dir: "./tmp".to_string(),
         groups_dir: "groups".to_string(),
-        model_file_name: ".gitlab".to_string(),
+        model_file_name: ".gitlab.yaml".to_string(),
         write_group: true,
         write_model: true,
         handle_children: true,
