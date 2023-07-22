@@ -1,13 +1,11 @@
 mod gitlab;
-
+mod writer;
+mod common;
 
 use serde_yaml;
 use std::fs;
-
-
-
-
 use clap::Parser;
+use crate::writer::YamlModelWriter;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -29,13 +27,20 @@ fn main() {
     let args = Args::parse();
 
     // Create the client.
-    let group_node = match  gitlab::GroupNodeReader::new(args.url, args.token) {
+    let node = match  gitlab::GroupNodeReader::new(args.url, args.token) {
         Ok(mut reader) => reader.read(&args.group).expect("can't read Gitlab group"),
         Err(err) => panic!("{:?}", err)
     };
 
-    let group_node_yaml = serde_yaml::to_string(&group_node).expect("Can't marshal yaml");
-    let file_name = format!("{:?}.yaml", group_node.group.id.value());
-    fs::write(&file_name, group_node_yaml).expect("Unable to write file");
-    println!("File {:?} written", file_name)
+    let writer = YamlModelWriter{
+        output_dir: "./tmp".to_string(),
+        groups_dir: "groups".to_string(),
+        model_file_name: ".gitlab".to_string(),
+        write_group: true,
+        write_model: true,
+        handle_children: true,
+        model_files: vec!(),
+    };
+
+    writer.on_node(&node).expect("can't write model")
 }

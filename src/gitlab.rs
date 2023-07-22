@@ -8,9 +8,10 @@ use gitlab::types::Group;
 use gitlab::types::GroupDetail;
 
 use std::collections::HashSet;
+use std::io;
 use std::path::Path;
 use log::{info, warn};
-use thiserror::Error;
+use crate::common::{Error, Result};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GroupNode {
@@ -28,7 +29,8 @@ impl GroupNode {
     fn set_children_relative_root_path(&mut self) {
         for mut child in self.children.iter_mut() {
             child.relative_root_path =
-                Path::new(&self.relative_root_path).join(&child.group.path).into_os_string().into_string().unwrap();
+                Path::new(&self.relative_root_path).
+                    join(&child.group.path).into_os_string().into_string().unwrap();
             if !child.children.is_empty() {
                 child.set_children_relative_root_path()
             }
@@ -45,21 +47,6 @@ struct GroupIdName {
     name: String
 }
 
-#[derive(Debug, Error)]
-#[non_exhaustive]
-pub enum GitlabCtlError {
-    #[error("gitlab error: {}", source)]
-    GitlabError {
-        source: GitlabError
-    },
-    #[error("general error: {}", source)]
-    General {
-        source: ApiError<RestError>,
-    },
-    #[error("AlreadyHandled")]
-    AlreadyHandled
-}
-
 pub struct GroupNodeReader {
     gitlab: Gitlab,
     ignore_group_names: HashSet<String>,
@@ -67,7 +54,7 @@ pub struct GroupNodeReader {
 }
 
 impl GroupNodeReader {
-    pub fn new<H, T>(gitlab_url: H, gitlab_token: T) -> Result<GroupNodeReader,GitlabError>
+    pub fn new<H, T>(gitlab_url: H, gitlab_token: T) -> Result<GroupNodeReader>
         where
             H: AsRef<str>,
             T: Into<String>,
@@ -78,11 +65,11 @@ impl GroupNodeReader {
                 ignore_group_names: Default::default(),
                 already_handled_groups: Default::default(),
             }),
-            Err(err) => Err(err)
+            Err(err) => Err(Error::GitlabError{source: err})
         }
     }
 
-    pub fn read(&mut self, group_name_or_id: &str) -> Result<GroupNode, GitlabCtlError> {
+    pub fn read(&mut self, group_name_or_id: &str) -> Result<GroupNode> {
 
         let group_detail: Result<GroupDetail, ApiError<RestError>> = groups::Group::builder()
             .group(group_name_or_id)
@@ -98,7 +85,7 @@ impl GroupNodeReader {
                 r
             },
             Err(err) => {
-                Err(GitlabCtlError::General {source: err})
+                Err(Error::General {source: err})
             }
         }
     }
@@ -107,7 +94,7 @@ impl GroupNodeReader {
         self.already_handled_groups.insert(group_id);
     }
 
-    fn read_for_group_detail(&mut self, group: GroupDetail) -> Result<GroupNode, GitlabCtlError> {
+    fn read_for_group_detail(&mut self, group: GroupDetail) -> Result<GroupNode> {
         self.mark_as_already_handled(group.id.value());
 
         let group_id = &group.id.value();
@@ -138,9 +125,9 @@ impl GroupNodeReader {
         Ok(group_node)
     }
 
-    fn read_child_group(&mut self, group_id: &u64, group_name: &str) -> Result<GroupNode, GitlabCtlError> {
+    fn read_child_group(&mut self, group_id: &u64, group_name: &str) -> Result<GroupNode> {
         if !self.shall_read_group(group_id, group_name) {
-            return Err(GitlabCtlError::AlreadyHandled)
+            return Err(Error::AlreadyHandled)
         }
 
         let group_detail: GroupDetail = groups::Group::builder()
