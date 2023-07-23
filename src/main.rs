@@ -18,6 +18,7 @@ use crate::gitlab::GroupNode;
 use clap::Parser;
 use crate::handler::{FsModelHandler, CompositeHandler, Handler};
 use crate::yaml::YamlWriter;
+use crate::gen::Generator;
 use std::boxed::Box;
 
 #[derive(Parser, Debug)]
@@ -66,9 +67,9 @@ fn main() {
         Box::new(CompositeHandler {
             handlers: vec![build_yaml_writer(), build_yaml_writer()],
         })
-    } else if args.write_model {
-        build_yaml_writer()
     } else if args.generate_scripts {
+        build_script_generator()
+    } else if args.write_model {
         build_yaml_writer()
     } else {
         build_yaml_writer()
@@ -88,4 +89,8 @@ fn build_yaml_writer() -> Box<dyn Handler> {
         model_file_name: ".gitlab.yaml".to_string(),
         model_files: vec!(),
     })
+}
+
+fn build_script_generator() -> Box<dyn Handler> {
+    Box::new(Generator{})
 }

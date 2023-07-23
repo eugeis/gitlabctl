@@ -30,7 +30,6 @@ impl YamlWriter {
 
 pub fn write_yaml<T>(target_file_path: &Path, item: T) -> Result<()> where T:serde::Serialize{
     let yaml = serde_yaml::to_string(&item)?;
-    fs::create_dir_all(target_file_path.parent().unwrap())?;
     fs::write(target_file_path, yaml)?;
     info!("File {:?} written", target_file_path);
     return Ok(());

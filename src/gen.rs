@@ -1,16 +1,21 @@
-
+use std::path::Path;
+use std::fs;
+use log::{info, warn};
+use crate::common::{Result};
+use crate::gitlab::GroupNode;
+use crate::handler::Handler;
 
 use std::collections::HashMap;
 
 use std::error::Error;
-use tera::{Context, Result, Tera};
+use tera::{Context, Tera};
 
 lazy_static! {
     pub static ref TEMPLATES: Tera = {
         let mut tera = match Tera::new("templates/**/*") {
             Ok(t) => t,
             Err(e) => {
-                println!("Parsing error(s): {}", e);
+                warn!("Parsing error(s): {}", e);
                 ::std::process::exit(1);
             }
         };
@@ -20,25 +25,27 @@ lazy_static! {
 }
 
 
-pub fn gen() {
-    let mut context = Context::new();
-    context.insert("username", &"Bob");
-    context.insert("numbers", &vec![1, 2, 3]);
-    context.insert("show_all", &false);
-    context.insert("bio", &"<script>alert('pwnd');</script>");
+pub struct Generator {
+}
 
-    // A one off template
-    Tera::one_off("hello", &Context::new(), true).unwrap();
+impl Handler for Generator {
+    fn on_node(&self, target_path: &Path, item: &GroupNode) -> Result<()> {
+        let mut context = Context::new();
+        context.insert("groupNode", item);
 
-    match TEMPLATES.render("pull.sh", &context) {
-        Ok(s) => println!("{:?}", s),
-        Err(e) => {
-            println!("Error: {}", e);
-            let mut cause = e.source();
-            while let Some(e) = cause {
-                println!("Reason: {}", e);
-                cause = e.source();
-            }
+        for template in ["clone.sh","pull.sh","status.sh"] {
+            let target_file_path_buf = Path::new(target_path).join(template);
+            let target_file_path = target_file_path_buf.as_path();
+
+            let target_file = fs::File::create(target_file_path)?;
+
+            match TEMPLATES.render_to(template, &context, target_file) {
+                Err(e) => {
+                    warn!("Error: {}", e);
+                }
+                _ => {}
+            };
         }
-    };
+        Ok(())
+    }
 }

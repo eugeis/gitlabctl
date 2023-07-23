@@ -14,8 +14,13 @@ pub struct FsModelHandler {
 
 impl FsModelHandler {
     pub fn on_node(&self, item: &GroupNode) -> Result<()>{
-        let target_path = Path::new(&self.output_dir).join(&item.relative_root_path);
-        let result = self.handler.on_node(target_path.as_path(), item);
+        let target_path_buf = Path::new(&self.output_dir).
+            join(&item.relative_root_path);
+
+        let target_path = target_path_buf.as_path();
+        fs::create_dir_all(target_path)?;
+
+        let result = self.handler.on_node(target_path, item);
 
         if result.is_err() {
             return result
