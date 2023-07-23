@@ -1,13 +1,13 @@
 use std::path::Path;
 use std::fs;
-use log::{info, warn};
+use log::{warn};
 use crate::common::{Result};
 use crate::gitlab::GroupNode;
 use crate::handler::Handler;
 
-use std::collections::HashMap;
 
-use std::error::Error;
+
+
 use tera::{Context, Tera};
 
 lazy_static! {

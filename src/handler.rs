@@ -1,9 +1,9 @@
 use std::fs;
 use std::path::Path;
-use log::info;
+
 use crate::gitlab::{GroupNode};
 use crate::common::{Result};
-use crate::yaml::{write_yaml};
+
 
 pub struct FsModelHandler {
     pub output_dir: String,
