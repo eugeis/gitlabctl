@@ -14,3 +14,4 @@ thiserror = "1.0.41"
 clap = { version = "4.3.17", features = ["derive"] }
 tera = { version = "1", default-features = false }
 lazy_static = "1.4.0"
+env_logger = "0.10.0"

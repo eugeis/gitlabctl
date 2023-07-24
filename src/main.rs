@@ -4,7 +4,6 @@ mod common;
 mod gen;
 mod yaml;
 
-#[macro_use]
 extern crate tera;
 #[macro_use]
 extern crate lazy_static;
@@ -26,9 +25,9 @@ struct Args {
     #[arg(short, long, default_value = "code.siemens.com")]
     url: String,
 
-    /// Gitlab Group to read
-    #[arg(short, long)]
-    group: String,
+    /// Gitlab Groups to read
+    #[arg(short, long, value_parser, num_args = 1.., value_delimiter = ',')]
+    groups: Vec<String>,
 
     /// Base dir for generation
     #[arg(short, long, default_value = ".")]
@@ -50,13 +49,6 @@ struct Args {
 fn main() {
     let args = Args::parse();
 
-    // Create the client.
-    let node = match  gitlab::GroupNodeReader::new(args.url, args.token) {
-        Ok(mut reader) => reader.read(&args.group).
-            expect("can't read Gitlab group"),
-        Err(err) => panic!("{:?}", err)
-    };
-
     let handler = if args.write_model && args.generate_scripts {
         Box::new(CompositeHandler {
             handlers: vec![build_yaml_writer(), build_yaml_writer()],
@@ -69,13 +61,23 @@ fn main() {
         build_yaml_writer()
     };
 
-    let writer = FsModelHandler {
+    let fs_handler = FsModelHandler {
         output_dir: args.output_dir,
         handle_children: true,
         handler,
     };
 
-    writer.on_node(&node).expect("can't write model")
+    match  gitlab::GroupNodeReader::new(args.url, args.token) {
+        Ok(mut reader) =>
+            for group in &args.groups {
+                println!("read group: {:?}", group);
+                match reader.read(group) {
+                    Ok(node) => fs_handler.on_node(&node).expect("can't write model"),
+                    Err(err) => eprintln!("Can't read Gitlab group: {}", err)
+                }
+            }
+        Err(err) => panic!("{:?}", err)
+    };
 }
 
 fn build_yaml_writer() -> Box<dyn Handler> {

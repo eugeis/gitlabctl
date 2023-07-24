@@ -37,7 +37,7 @@ impl Handler for Generator {
 
             match TEMPLATES.render_to(template, &context, target_file) {
                 Err(e) => {
-                    warn!("Error: {}", e);
+                    eprintln!("Error: {}", e);
                 }
                 _ => {}
             };

@@ -12,6 +12,7 @@ use std::collections::HashSet;
 use std::path::Path;
 use log::{info, warn};
 use crate::common::{Error, Result};
+use crate::common::Error::AlreadyHandled;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GroupNode {
@@ -99,7 +100,7 @@ impl GroupNodeReader {
 
         let group_id = &group.id.value();
 
-        info!("handle {}({})", group_id, &group.name);
+        println!("handle {}({})", group_id, &group.name);
 
         let mut group_node = GroupNode{
             group,
@@ -114,7 +115,10 @@ impl GroupNodeReader {
         for group_id_name in &group_id_names {
             match self.read_child_group(&group_id_name.id, &group_id_name.name) {
                 Ok(node) => group_node.on_child(node),
-                Err(error) => println!("reading child group: {:?}", error),
+                Err(error) => match &error {
+                    AlreadyHandled => {},
+                    other_error => eprintln!("reading child group: {}", other_error),
+                }
             };
         }
 
@@ -132,7 +136,7 @@ impl GroupNodeReader {
 
         let group_detail: GroupDetail = groups::Group::builder()
             .group(group_id.clone())
-            .build().unwrap().query(&self.gitlab).unwrap();
+            .build().unwrap().query(&self.gitlab)?;
 
         self.read_for_group_detail(group_detail)
     }
@@ -145,7 +149,7 @@ impl GroupNodeReader {
         for sub_group in sub_groups {
             match self.read_child_group( &sub_group.id.value(), &sub_group.name) {
                 Ok(group_node) => on_child(group_node),
-                Err(err) => warn!("can't read child group: {:?}", err)
+                Err(err) => eprintln!("can't read child group: {:?}", err)
             }
         }
     }
