@@ -33,10 +33,6 @@ struct Args {
     #[arg(short, long, default_value = ".")]
     output_dir: String,
 
-    /// relative dir for Gitlab group models
-    #[arg(long, default_value = "groups")]
-    groups_dir: String,
-
     /// write Group Node model to Yaml file
     #[arg(long,default_value_t = false)]
     write_model: bool,
