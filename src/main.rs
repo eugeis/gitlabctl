@@ -9,12 +9,6 @@ extern crate tera;
 #[macro_use]
 extern crate lazy_static;
 
-
-
-
-
-
-
 use clap::Parser;
 use crate::handler::{FsModelHandler, CompositeHandler, Handler};
 use crate::yaml::YamlWriter;

@@ -4,7 +4,6 @@ use std::path::Path;
 use crate::gitlab::{GroupNode};
 use crate::common::{Result};
 
-
 pub struct FsModelHandler {
     pub output_dir: String,
 

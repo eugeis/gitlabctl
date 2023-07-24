@@ -5,21 +5,17 @@ use crate::common::{Result};
 use crate::gitlab::GroupNode;
 use crate::handler::Handler;
 
-
-
-
 use tera::{Context, Tera};
 
 lazy_static! {
     pub static ref TEMPLATES: Tera = {
-        let mut tera = match Tera::new("templates/**/*") {
+        let tera = match Tera::new("templates/**/*") {
             Ok(t) => t,
             Err(e) => {
-                warn!("Parsing error(s): {}", e);
+                println!("Parsing error(s): {}", e);
                 ::std::process::exit(1);
             }
         };
-        tera.autoescape_on(vec![".sh"]);
         tera
     };
 }
