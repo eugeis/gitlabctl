@@ -10,7 +10,7 @@ use gitlab::types::GroupDetail;
 use std::collections::HashSet;
 
 use std::path::Path;
-use log::{info, warn};
+
 use crate::common::{Error, Result};
 use crate::common::Error::AlreadyHandled;
 

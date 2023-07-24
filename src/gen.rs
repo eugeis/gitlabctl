@@ -1,6 +1,6 @@
 use std::path::Path;
 use std::fs;
-use log::{warn};
+
 use crate::common::{Result};
 use crate::gitlab::GroupNode;
 use crate::handler::Handler;
