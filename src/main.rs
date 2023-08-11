@@ -72,7 +72,7 @@ fn main() {
                     Err(err) => eprintln!("Can't read Gitlab group: {}", err)
                 }
             }
-        Err(err) => panic!("{:?}", err)
+        Err(err) => panic!("can't read group {}", err)
     };
 }
 
