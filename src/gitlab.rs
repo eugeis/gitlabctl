@@ -28,7 +28,7 @@ impl GroupNode {
     }
 
     fn set_children_relative_root_path(&mut self) {
-        for mut child in self.children.iter_mut() {
+        for child in self.children.iter_mut() {
             child.relative_root_path =
                 Path::new(&self.relative_root_path).
                     join(&child.group.path).into_os_string().into_string().unwrap();
