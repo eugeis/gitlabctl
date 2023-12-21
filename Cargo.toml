@@ -6,12 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-gitlab = "0.1601.0"
-serde = "1.0.166"
-serde_yaml = "0.9.22"
-log = "0.4.19"
-thiserror = "1.0.41"
-clap = { version = "4.3.17", features = ["derive"] }
-tera = { version = "1", default-features = false }
-lazy_static = "1.4.0"
-env_logger = "0.10.0"
+#tokio = {version = "*", features = ["full"]}
+gitlab = "*"
+serde = "*"
+serde_yaml = "*"
+log = "*"
+thiserror = "*"
+clap = { version = "*", features = ["derive"] }
+tera = { version = "*", default-features = false }
+lazy_static = "*"
+env_logger = "*"

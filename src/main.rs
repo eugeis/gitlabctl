@@ -47,7 +47,7 @@ fn main() {
 
     let handler = if args.write_model && args.generate_scripts {
         Box::new(CompositeHandler {
-            handlers: vec![build_yaml_writer(), build_yaml_writer()],
+            handlers: vec![build_yaml_writer(), build_script_generator()],
         })
     } else if args.generate_scripts {
         build_script_generator()
@@ -68,11 +68,13 @@ fn main() {
             for group in &args.groups {
                 println!("read group: {:?}", group);
                 match reader.read(group) {
-                    Ok(node) => fs_handler.on_node(&node).expect("can't write model"),
-                    Err(err) => eprintln!("Can't read Gitlab group: {}", err)
+                    Ok(node) => {
+                        fs_handler.on_node(&node).expect("can't write model")
+                    },
+                    Err(err) => eprintln!("can't read the group '{}': {}", group, err)
                 }
             }
-        Err(err) => panic!("can't read group {}", err)
+        Err(err) => panic!("can't connect to Gitlab: {}", err)
     };
 }
 
