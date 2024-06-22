@@ -5,28 +5,42 @@ use crate::common::Result;
 use crate::gitlab::GroupNode;
 use crate::handler::Handler;
 
+use include_dir::{include_dir, Dir};
 use tera::{Tera, Context};
 use lazy_static::lazy_static;
-use walkdir::WalkDir;
 use std::collections::HashMap;
 
-const TEMPLATES_FOLDER: &str = "templates/";
+const TEMPLATES_FOLDER: Dir = include_dir!("templates");
 
 lazy_static! {
     static ref TERA: Tera = {
         let mut tera = Tera::default();
 
         let mut templates: HashMap<String, String> = HashMap::new();
-
-        for entry in WalkDir::new(TEMPLATES_FOLDER).into_iter().filter_map(|e| e.ok()) {
-            if entry.file_type().is_file() {
-                let file_path = entry.path();
-                let file_name = file_path.to_string_lossy().to_string();
-                let content = fs::read_to_string(&file_path).expect("Unable to open file");
-                let template_name = file_name.strip_prefix(TEMPLATES_FOLDER).unwrap().to_string();
-                templates.insert(template_name, content);
+        
+        fn load_dir(dir: &Dir, templates: &mut HashMap<String, String>) {
+            for entry in dir.entries().into_iter() {
+                match entry.as_file() {
+                    Some(file) => {
+                        let file_name = file.path().to_string_lossy().to_string();
+                        let content = file.contents_utf8().expect("Unable to open file");
+                        let template_name = file_name.to_string();
+                        println!("load template: {}", template_name);
+                        templates.insert(template_name, content.to_string());
+                    }
+                    None => {
+                        match entry.as_dir() {
+                            Some(dir) => {
+                                load_dir(dir, templates);
+                            }
+                            None => {}
+                            
+                        }
+                    }
+                }
             }
         }
+        load_dir(&TEMPLATES_FOLDER, &mut templates);
 
         //println!("register templates first time in order to load templates without dependencies");
         for (name, content) in &templates {
