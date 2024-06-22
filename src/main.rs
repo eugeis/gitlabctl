@@ -41,22 +41,21 @@ pub struct Args {
     write_model: bool,
 
     /// generate Git scripts
-    #[arg(long,default_value_t = true)]
-    generate_scripts: bool,
+    #[arg(long,default_value = "clone.sh,pull.sh,status.sh,scripts.sh", value_delimiter = ',', num_args = 1..)]
+    generate_templates: Vec<String>,
+
 }
 
 fn main() {
     let args = Args::parse();
     let gitlab_token_file_path = args.gitlab_token_file.resolve();
     let gitlab_token: String = fs::read_to_string(gitlab_token_file_path).expect("can't read gitlab token file").trim().to_string();
-    let handler = if args.write_model && args.generate_scripts {
+    let handler = if args.write_model && !args.generate_templates.is_empty() {
         Box::new(CompositeHandler {
-            handlers: vec![build_yaml_writer(), build_script_generator(args.gitlab_token_file)],
+            handlers: vec![build_yaml_writer(), build_script_generator(args.generate_templates, args.gitlab_token_file)],
         })
-    } else if args.generate_scripts {
-        build_script_generator(args.gitlab_token_file)
-    } else if args.write_model {
-        build_yaml_writer()
+    } else if !args.generate_templates.is_empty() {
+        build_script_generator(args.generate_templates, args.gitlab_token_file)
     } else {
         build_yaml_writer()
     };
@@ -84,11 +83,10 @@ fn main() {
 
 fn build_yaml_writer() -> Box<dyn Handler> {
     Box::new(YamlWriter {
-        model_file_name: ".gitlab.yaml".to_string(),
-        model_files: vec!(),
+        model_file_name: ".gitlab.yaml".to_string()
     })
 }
 
-fn build_script_generator(gitlab_token_file: String) -> Box<dyn Handler> {
-    Box::new(Generator{gitlab_token_file: gitlab_token_file})
+fn build_script_generator(templates: Vec<String>, gitlab_token_file: String) -> Box<dyn Handler> {
+    Box::new(Generator{templates: templates, gitlab_token_file: gitlab_token_file})
 }

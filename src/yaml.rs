@@ -6,8 +6,7 @@ use crate::gitlab::GroupNode;
 use crate::handler::Handler;
 
 pub struct YamlWriter {
-    pub model_file_name: String,
-    pub model_files: Vec<String>
+    pub model_file_name: String
 }
 
 impl Handler for YamlWriter {
