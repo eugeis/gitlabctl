@@ -32,8 +32,8 @@ pub struct Args {
     output_dir: String,
 
     /// Gitlab token file for update_scripts.sh path
-    #[arg(long, default_value = "~/.ssh/gitlab_token_read")]
-    gitlab_token_file: String,
+    #[arg(short, long, default_value = "~/.ssh/gitlab_token_read")]
+    token_file: String,
 
     /// write Group Node model to Yaml file
     #[arg(long,default_value_t = false)]
@@ -47,14 +47,14 @@ pub struct Args {
 
 fn main() {
     let args = Args::parse();
-    let gitlab_token_file_path = args.gitlab_token_file.resolve();
+    let gitlab_token_file_path = args.token_file.resolve();
     let gitlab_token: String = fs::read_to_string(gitlab_token_file_path).expect("can't read gitlab token file").trim().to_string();
     let handler = if args.write_model && !args.generate_templates.is_empty() {
         Box::new(CompositeHandler {
-            handlers: vec![build_yaml_writer(), build_script_generator(args.generate_templates, args.gitlab_token_file)],
+            handlers: vec![build_yaml_writer(), build_script_generator(args.generate_templates, args.token_file)],
         })
     } else if !args.generate_templates.is_empty() {
-        build_script_generator(args.generate_templates, args.gitlab_token_file)
+        build_script_generator(args.generate_templates, args.token_file)
     } else {
         build_yaml_writer()
     };
