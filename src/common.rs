@@ -1,5 +1,5 @@
 use std::io;
-use gitlab::api::{ApiError};
+use gitlab::api::ApiError;
 use gitlab::{GitlabError, RestError};
 use thiserror;
 use serde_yaml;

@@ -22,7 +22,7 @@ impl YamlWriter {
         let file_name = if self.model_file_name != "" {
             self.model_file_name.clone()
         } else {
-            format!("{:?}.yaml", item.group.id.value().to_string())
+            format!("{:?}.yaml", item.group.id.to_string())
         };
         file_name
     }

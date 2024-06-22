@@ -9,6 +9,7 @@ edition = "2021"
 #tokio = {version = "*", features = ["full"]}
 gitlab = "*"
 serde = "*"
+serde_json = "*"
 serde_yaml = "*"
 log = "*"
 thiserror = "*"
@@ -16,3 +17,5 @@ clap = { version = "*", features = ["derive"] }
 tera = { version = "*", default-features = false }
 lazy_static = "*"
 env_logger = "*"
+resolve-path = "*"
+serde_with = "3.8.1"
