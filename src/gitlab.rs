@@ -67,9 +67,9 @@ impl GroupNodeReader {
 
     pub fn read(&mut self, group_name_or_id: &str) -> Result<GroupNode> {
 
-        let group_detail: Result<ExpandedGroupSchema, ApiError<RestError>> = dbg!(groups::Group::builder()
+        let group_detail: Result<ExpandedGroupSchema, ApiError<RestError>> = groups::Group::builder()
             .group(group_name_or_id)
-            .build().unwrap().query(&self.gitlab));
+            .build().unwrap().query(&self.gitlab);
 
         return match group_detail {
             Ok(group) => {
