@@ -1,4 +1,4 @@
-use std::{fs::File, path::Path};
+use std::path::Path;
 use std::fs;
 
 use crate::common::Result;
@@ -31,7 +31,7 @@ lazy_static! {
         //println!("register templates first time in order to load templates without dependencies");
         for (name, content) in &templates {
             match tera.add_raw_template(name.as_str() , content.as_str()) {
-                Err(e) => {
+                Err(_) => {
                     //println!("can't add template, the first time: {}", e);
                 },
                 _ => {}
