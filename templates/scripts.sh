@@ -3,6 +3,4 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ME="$(basename "$0")"
 
-GITLAB_TOKEN=`cat {{ gitlabTokenFile }}`
-
-gitlabctl --groups "{{ groupNode.group.path }}" -o "$DIR/.." -t "$GITLAB_TOKEN"
+gitlabctl --groups "{{ groupNode.group.full_path }}" -o "$DIR/.." -t "{{ gitlabTokenFile }}"
