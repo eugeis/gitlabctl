@@ -771,3 +771,1022 @@ pub struct ProjectLicenseSchema {
     #[serde(default)]
     pub source_url: String,
 }
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct PipelineSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub id: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub iid: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub project_id: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub sha: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub ref_: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub status: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub source: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub created_at: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub updated_at: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub web_url: String,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct ExpandedPipelineSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub before_sha: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub tag: bool,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub yaml_errors: Option<serde_json::Value>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub user: SimpleUserSchema,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub started_at: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub finished_at: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub committed_at: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub duration: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub queued_duration: Option<serde_json::Value>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub coverage: Option<serde_json::Value>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub detailed_status: DetailedStatus,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct PipelineTestCaseSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub status: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub name: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub classname: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub execution_time: f64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub system_output: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub stack_trace: Option<String>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct PipelineTestSuiteSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub name: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub total_time: f64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub total_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub success_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub failed_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub skipped_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub error_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub test_cases: Option<Vec<PipelineTestCaseSchema>>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct PipelineTestReportSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub total_time: f64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub total_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub success_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub failed_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub skipped_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub error_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub test_suites: Option<Vec<PipelineTestSuiteSchema>>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct PipelineTestReportSummarySchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub total: SummaryTotal,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub test_suites: Option<Vec<PipelineTestSuiteSchema>>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct SummaryTotal {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub time: f64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub success: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub failed: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub skipped: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub error: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub suite_error: Option<String>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct DetailedStatus {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub icon: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub text: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub label: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub group: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub tooltip: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub has_details: bool,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub details_path: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub illustration: Option<serde_json::Value>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub favicon: String,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct SimpleUserSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub id: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub name: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub username: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub state: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub avatar_url: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub web_url: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub created_at: String,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct UserSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub locked: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub bio: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub bot: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub location: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub public_email: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub skype: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub linkedin: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub twitter: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub discord: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub website_url: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub pronouns: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub organization: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub job_title: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub work_information: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub followers: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub following: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub local_time: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub is_followed: Option<bool>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct ExpandedUserSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub is_admin: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub bot: bool,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub last_sign_in_at: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub confirmed_at: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub last_activity_on: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub email: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub theme_id: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub color_scheme_id: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub projects_limit: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub current_sign_in_at: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub note: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub identities: Option<Vec<Identity>>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub can_create_group: bool,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub can_create_project: bool,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub two_factor_enabled: bool,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub external: bool,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub private_profile: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub namespace_id: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub created_by: Option<String>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct AdminUserSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub current_sign_in_ip: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub last_sign_in_ip: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub using_license_seat: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub email_reset_offered_at: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub shared_runners_minutes_limit: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub extra_shared_runners_minutes_limit: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub is_auditor: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub provisioned_by_group_id: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub plan: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub trial: Option<bool>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct UserActivitySchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub username: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub last_activity_on: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub last_activity_at: String,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct UserStatusSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub emoji: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub availability: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub message: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub message_html: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub clear_status_at: String,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct UserPreferenceSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub id: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub user_id: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub view_diffs_file_by_file: bool,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub show_whitespace_in_diffs: bool,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct UserCountSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub merge_requests: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub assigned_issues: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub assigned_merge_requests: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub review_requested_merge_requests: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub todos: u64,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct UserAssociationCountSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub groups_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub projects_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub issues_count: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub merge_requests_count: u64,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct UserMembershipSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub source_id: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub source_name: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub source_type: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub access_level: u64,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct UserRunnerSchema {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub id: u64,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub token: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub token_expires_at: Option<String>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct Identity {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub provider: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub extern_uid: String,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub saml_provider_id: u64,
+}
+
+// Define the options types using structs and serde_as for the optional fields
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct AllUsersOptions {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub order_by: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub created_by: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub sort: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub two_factor: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub without_projects: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub admins: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub saml_provider_id: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub skip_ldap: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub search: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub username: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub active: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub blocked: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub external: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub exclude_internal: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub exclude_external: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub without_project_bots: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub created_before: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub created_after: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub with_custom_attributes: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub custom_attributes: Option<std::collections::HashMap<String, String>>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub provider: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub extern_uid: Option<String>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct CreateUserOptions {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub admin: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub auditor: Option<bool>,
+
+    //#[serde_as(as = "DefaultOnError")]
+    //#[serde(default)]
+    //pub avatar: Option<Avatar>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub bio: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub can_create_group: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub color_scheme_id: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub commit_email: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub email: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub extern_uid: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub external: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub extra_shared_runners_minutes_limit: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub force_random_password: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub group_id_for_saml: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub linkedin: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub location: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub name: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub note: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub organization: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub password: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub private_profile: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub projects_limit: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub pronouns: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub provider: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub public_email: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub reset_password: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub shared_runners_minutes_limit: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub skip_confirmation: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub skype: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub theme_id: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub twitter: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub discord: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub username: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub view_diffs_file_by_file: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub website_url: Option<String>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct CreateUserCIRunnerOptions {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub group_id: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub project_id: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub description: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub paused: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub locked: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub run_untagged: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub tag_list: Option<Vec<String>>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub access_level: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub maximum_timeout: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub maintenance_note: Option<String>,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct AllUserProjectsOptions {
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub archived: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub id_after: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub id_before: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub membership: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub min_access_level: Option<u64>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub order_by: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub owned: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub search: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub simple: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub sort: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub starred: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub statistics: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub visibility: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub with_custom_attributes: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub with_issues_enabled: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub with_merge_requests_enabled: Option<bool>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub with_programming_language: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub updated_before: Option<String>,
+
+    #[serde_as(as = "DefaultOnError")]
+    #[serde(default)]
+    pub updated_after: Option<String>,
+}
+
