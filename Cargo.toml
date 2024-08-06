@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 #tokio = {version = "*", features = ["full"]}
 gitlab = "*"
-serde = "*"
+serde = { version = "*", features = ["derive"] }
 serde_json = "*"
 serde_yaml = "*"
 log = "*"
