@@ -5,6 +5,7 @@ mod handler;
 mod common;
 mod gen;
 mod yaml;
+mod ci_parser;
 
 extern crate tera;
 extern crate lazy_static;
