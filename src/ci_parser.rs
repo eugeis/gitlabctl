@@ -90,6 +90,18 @@ pub struct GitlabJob {
     pub before_script: Option<Vec<String>>,
 }
 
+impl GitlabJob {
+    pub fn variables_as_strings(&self) -> HashMap<String, String> {
+        let mut string_vars = HashMap::new();
+        if let Some(vars) = &self.variables {
+            for (key, value) in vars {
+                string_vars.insert(key.clone(), value.to_string());
+            }
+        }
+        string_vars
+    }
+}
+
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Image {
     pub name: String,

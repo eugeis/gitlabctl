@@ -46,7 +46,7 @@ fn main() {
         commands::Commands::DeletePipelines(cmd) => {
             cmd.run(&args.url, &gitlab_token);
         }
-        commands::Commands::GenerateBashScripts(cmd) => {
+        commands::Commands::GenerateCiScripts(cmd) => {
             cmd.run();
         }
     }

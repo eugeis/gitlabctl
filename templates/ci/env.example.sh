@@ -4,6 +4,6 @@
 {% if variables -%}
 # Variables
 {% for var_name, var_value in job.variables -%}
-export {{ var_name }}=""
+export {{ var_name }}="{{ var_value }}"
 {% endfor -%}
 {% endif -%}

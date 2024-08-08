@@ -1,46 +1,47 @@
 #!/bin/bash
 # This file is generated, do not update manually
 
-# Job: {{ job_name }}
-{% if not is_template %}
+{%- if not is_template %}
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ME="$(basename "$0")"
 
 pushd "$DIR" || exit 1
+
+source .env.sh
 {% endif %}
 
-{% if job.variables -%}
+{% if variables -%}
 # Variables
-{% for var_name, var_value in job.variables %}
+{%- for var_name, var_value in variables %}
 export {{ var_name }}="{{ var_value }}"
-{% endfor %}
-{% endif %}
+{%- endfor %}
+{%- endif %}
 
-{% if job.extends %}
+{% if job.extends -%}
 # Extends
-{% if job.extends is iterable -%}
-{% for parent in job.extends -%}
+{%- if job.extends is iterable %}
+{%- for parent in job.extends %}
 source {{ parent }}.sh
 {% endfor %}
 {% else %}
 source {{ job.extends }}.sh
-{% endif %}
-{% endif %}
+{%- endif %}
+{%- endif %}
 
-{% if job.before_script -%}
+{%- if job.before_script %}
 # Before Script
-{% for command in job.before_script -%}
+{%- for command in job.before_script %}
 {{ command }}
-{% endfor %}
-{% endif %}
+{%- endfor %}
+{%- endif %}
 
-{% if job.script -%}
+{%- if job.script %}
 # Script
-{% for command in job.script %}
+{%- for command in job.script %}
 {{ command }}
-{% endfor %}
-{% endif %}
+{%- endfor %}
+{%- endif %}
 
-{% if not is_template -%}
+{% if not is_template %}
 popd || exit 1
-{% endif %}
+{%- endif %}

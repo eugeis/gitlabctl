@@ -97,9 +97,9 @@ impl Handler for GitScriptGenerator {
     }
 }
 
-pub struct GitCiBashScriptGenerator {}
+pub struct GitCiScriptGenerator {}
 
-impl GitCiBashScriptGenerator {
+impl GitCiScriptGenerator {
     pub(crate) fn gen(ci: &GitlabCi, output_dir: &str) {
         // Create the output directory if it doesn't exist
         if !Path::new(output_dir).exists() {
@@ -137,6 +137,7 @@ impl GitCiBashScriptGenerator {
             context.insert("job_name", job_name);
             context.insert("job", job);
             context.insert("is_template", &job_name.starts_with("."));
+            context.insert("variables", &job.variables_as_strings());
 
             let target_file_path_buf = Path::new(output_dir).join(format!("{}.sh", job_name));
             let target_file_path = target_file_path_buf.as_path();
