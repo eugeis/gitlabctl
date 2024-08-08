@@ -9,11 +9,13 @@ use include_dir::{include_dir, Dir};
 use tera::{Tera, Context};
 use lazy_static::lazy_static;
 use std::collections::HashMap;
+use std::fs::File;
+use crate::ci_parser::GitlabCi;
 
 const TEMPLATES_FOLDER: Dir = include_dir!("templates");
 
 lazy_static! {
-    static ref TERA: Tera = {
+    pub static ref TERA: Tera = {
         let mut tera = Tera::default();
 
         let mut templates: HashMap<String, String> = HashMap::new();
@@ -61,18 +63,16 @@ lazy_static! {
                 _ => {}
             }
         }
-
-
         tera
     };
 }
 
-pub struct Generator {
+pub struct GitScriptGenerator {
     pub templates: Vec<String>,
     pub gitlab_token_file: String
 }
 
-impl Handler for Generator {
+impl Handler for GitScriptGenerator {
     fn on_node(&self, target_path: &Path, item: &GroupNode) -> Result<()> {
         let mut context = Context::new();
         context.insert("groupNode", item);
@@ -82,20 +82,11 @@ impl Handler for Generator {
             let target_file_path_buf = Path::new(target_path).join(template);
             let target_file_path = target_file_path_buf.as_path();
 
-            let target_file = fs::File::create(target_file_path)?;
+            let target_file = File::create(target_file_path)?;
 
-            #[cfg(unix)]
-            {
-                use std::os::unix::fs::PermissionsExt;
-                match fs::set_permissions(target_file_path.as_os_str(), fs::Permissions::from_mode(0o700)) {
-                    Err(e)  => {
-                        println!("can't set permissions to file: {}", e);
-                    }
-                    _ => {}
-                }
-            }
+            make_executable(target_file_path);
 
-            match TERA.render_to(template, &context, target_file) {
+            match TERA.render_to(format!("git/{}", &template).as_str(), &context, target_file) {
                 Err(e) => {
                     println!("can't render file: {}", e);
                 }
@@ -103,5 +94,77 @@ impl Handler for Generator {
             };
         }
         Ok(())
+    }
+}
+
+pub struct GitCiBashScriptGenerator {}
+
+impl GitCiBashScriptGenerator {
+    pub(crate) fn gen(ci: &GitlabCi, output_dir: &str) {
+        // Create the output directory if it doesn't exist
+        if !Path::new(output_dir).exists() {
+            fs::create_dir_all(output_dir)
+                .expect(  "Unable to create output directory");
+        }
+
+        // Collect undefined environment variables
+        let undefined_vars = ci.collect_undefined_env_vars();
+
+        // Create .env.example file with undefined variables
+        if !undefined_vars.is_empty() {
+
+            let target_file_path_buf = Path::new(output_dir).join(".env.example");
+            let target_file_path = target_file_path_buf.as_path();
+
+            make_executable(target_file_path);
+
+            let mut context = Context::new();
+            context.insert("variables", &undefined_vars);
+
+            let target_file = File::create(&target_file_path)
+                .expect("Unable to create .env.example file");
+
+            match TERA.render_to("ci/env.example.sh", &context, &target_file) {
+                Err(e) => {
+                    println!("can't render file: {}", e);
+                }
+                _ => {}
+            };
+        }
+
+        for (job_name, job) in ci.jobs.iter() {
+            let mut context = Context::new();
+            context.insert("job_name", job_name);
+            context.insert("job", job);
+            context.insert("is_template", &job_name.starts_with("."));
+
+            let target_file_path_buf = Path::new(output_dir).join(format!("{}.sh", job_name));
+            let target_file_path = target_file_path_buf.as_path();
+
+            make_executable(&target_file_path);
+
+            let target_file = File::create(&target_file_path)
+                .expect("Unable to create .env.example file");
+
+            match TERA.render_to("ci/job.sh", &context, &target_file) {
+                Err(e) => {
+                    println!("can't render file: {}", e);
+                }
+                _ => {}
+            };
+        }
+    }
+}
+
+pub fn make_executable(target_file_path: &Path) {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        match fs::set_permissions(target_file_path.as_os_str(), fs::Permissions::from_mode(0o700)) {
+            Err(e) => {
+                println!("can't set permissions to file: {}", e);
+            }
+            _ => {}
+        }
     }
 }

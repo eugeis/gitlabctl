@@ -1,7 +1,8 @@
+use std::fs;
 use clap::Args;
 use crate::handler::{FsModelHandler, Handler};
 use crate::gitlab::GroupNodeReader;
-use crate::gen::Generator;
+use crate::gen::GitScriptGenerator;
 
 #[derive(Args, Debug)]
 pub struct GenerateGitScriptsCommand {
@@ -20,7 +21,8 @@ pub struct GenerateGitScriptsCommand {
 
 impl GenerateGitScriptsCommand {
     pub fn run(&self, url: &str, gitlab_token: &str) {
-        let handler = build_script_generator(self.generate_templates.clone(), gitlab_token.to_string());
+        let handler = build_script_generator(
+            self.generate_templates.clone(), gitlab_token.to_string());
 
         let fs_handler = FsModelHandler {
             output_dir: self.output_dir.clone(),
@@ -46,5 +48,5 @@ impl GenerateGitScriptsCommand {
 }
 
 fn build_script_generator(templates: Vec<String>, gitlab_token_file: String) -> Box<dyn Handler> {
-    Box::new(Generator { templates, gitlab_token_file })
+    Box::new(GitScriptGenerator { templates, gitlab_token_file })
 }

@@ -1,11 +1,11 @@
 // parser.rs
-use serde::{de, Deserialize, Deserializer};
+use serde::{de, Deserialize, Deserializer, Serialize};
 use std::collections::HashMap;
 use std::fmt::{self, Display};
 use serde::de::Visitor;
 use serde_yaml::{from_str, from_value, Value};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum VariableValue {
     String(String),
     Int(i32),
@@ -70,14 +70,14 @@ impl Display for VariableValue {
     }
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, Serialize)]
 #[serde(untagged)]
 pub enum Extends {
     Single(String),
     Multiple(Vec<String>),
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct GitlabJob {
     pub script: Option<Vec<String>>,
     pub extends: Option<Extends>,
@@ -90,13 +90,13 @@ pub struct GitlabJob {
     pub before_script: Option<Vec<String>>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Image {
     pub name: String,
     pub entrypoint: Option<Vec<String>>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct GitlabCi {
     pub include: Option<Vec<Include>>,
     pub stages: Option<Vec<String>>,
@@ -182,7 +182,7 @@ impl GitlabCi {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Include {
     pub project: String,
     #[serde(rename = "ref")]
