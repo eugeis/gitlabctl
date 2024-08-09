@@ -97,61 +97,58 @@ impl Handler for GitScriptGenerator {
     }
 }
 
-pub struct GitCiScriptGenerator {}
+pub struct GitCiScriptGenerator {
+    ci: GitlabCi,
+    output_dir: String,
+}
 
 impl GitCiScriptGenerator {
-    pub(crate) fn gen(ci: &GitlabCi, output_dir: &str) {
+    pub fn new(ci: GitlabCi, output_dir: &str) -> Self {
+        GitCiScriptGenerator {
+            ci,
+            output_dir: output_dir.to_string(),
+        }
+    }
+
+    pub fn gen(&self) {
         // Create the output directory if it doesn't exist
-        if !Path::new(output_dir).exists() {
-            fs::create_dir_all(output_dir)
-                .expect(  "Unable to create output directory");
+        if !Path::new(&self.output_dir).exists() {
+            fs::create_dir_all(&self.output_dir)
+                .expect("Unable to create output directory");
         }
 
-        // Collect undefined environment variables
-        let undefined_vars = ci.collect_undefined_env_vars();
-
-        // Create .env.example file with undefined variables
-        if !undefined_vars.is_empty() {
-
-            let target_file_path_buf = Path::new(output_dir).join(".env.example");
-            let target_file_path = target_file_path_buf.as_path();
-
-            make_executable(target_file_path);
-
-            let mut context = Context::new();
-            context.insert("variables", &undefined_vars);
-
-            let target_file = File::create(&target_file_path)
-                .expect("Unable to create .env.example file");
-
-            match TERA.render_to("ci/env.example.sh", &context, &target_file) {
-                Err(e) => {
-                    println!("can't render file: {}", e);
-                }
-                _ => {}
-            };
+        // Create empty script files for unresolved jobs
+        for job_name in self.ci.collect_unresolved_extends().iter() {
+            let target_file_path_buf = Path::new(&self.output_dir).join(format!("{}.sh", job_name));
+            if !target_file_path_buf.exists() {
+                File::create(&target_file_path_buf)
+                    .expect("Unable to create empty script file for unresolved job");
+                println!("Empty script file created: {:?}", &target_file_path_buf);
+            }
         }
 
-        for (job_name, job) in ci.jobs.iter() {
+        // Generate script files for all defined jobs
+        for (job_name, job) in self.ci.jobs.iter() {
             let mut context = Context::new();
             context.insert("job_name", job_name);
             context.insert("job", job);
             context.insert("is_template", &job_name.starts_with("."));
             context.insert("variables", &job.variables_as_strings());
 
-            let target_file_path_buf = Path::new(output_dir).join(format!("{}.sh", job_name));
-            let target_file_path = target_file_path_buf.as_path();
+            let target_file_path_buf = Path::new(&self.output_dir).join(format!("{}.sh", job_name));
 
-            make_executable(&target_file_path);
+            let target_file = File::create(&target_file_path_buf)
+                .expect("Unable to create job file");
 
-            let target_file = File::create(&target_file_path)
-                .expect("Unable to create .env.example file");
+            make_executable(&target_file_path_buf);
 
             match TERA.render_to("ci/job.sh", &context, &target_file) {
                 Err(e) => {
                     println!("can't render file: {}", e);
                 }
-                _ => {}
+                _ => {
+                    println!("file generated: {:?}", &target_file_path_buf);
+                }
             };
         }
     }

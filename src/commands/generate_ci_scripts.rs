@@ -19,7 +19,7 @@ impl GenerateCiScriptsCommand {
 
         let gitlab_ci = parse_gitlab_ci(&yml_content);
 
-        GitCiScriptGenerator::gen(&gitlab_ci, &self.output_dir);
+        GitCiScriptGenerator::new(gitlab_ci, &self.output_dir).gen();
     }
 }
 

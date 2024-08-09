@@ -1,6 +1,6 @@
 // parser.rs
 use serde::{de, Deserialize, Deserializer, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Display};
 use serde::de::Visitor;
 use serde_yaml::{from_str, from_value, Value};
@@ -120,77 +120,30 @@ impl GitlabCi {
         self.jobs.insert(name, job);
     }
 
-    pub fn resolve_job(&self, job_name: &str) -> Option<GitlabJob> {
-        let mut job = self.jobs.get(job_name)?.clone();
+    pub fn collect_unresolved_extends(&self) -> HashSet<String> {
+        let mut unresolved_extends = HashSet::new();
+        let all_job_names: HashSet<_> = self.jobs.keys().cloned().collect();
 
-        if let Some(extends) = job.extends.clone() {
-            match extends {
-                Extends::Single(parent) => {
-                    if let Some(parent_job) = self.resolve_job(&parent) {
-                        job = self.merge_jobs(parent_job, job);
-                    }
-                }
-                Extends::Multiple(parents) => {
-                    for parent in parents {
-                        if let Some(parent_job) = self.resolve_job(&parent) {
-                            job = self.merge_jobs(parent_job, job);
+        for job in self.jobs.values() {
+            if let Some(extends) = &job.extends {
+                match extends {
+                    Extends::Single(job_name) => {
+                        if !all_job_names.contains(job_name) {
+                            unresolved_extends.insert(job_name.clone());
                         }
                     }
-                }
-            }
-        }
-        Some(job)
-    }
-
-    fn merge_jobs(&self, parent: GitlabJob, mut child: GitlabJob) -> GitlabJob {
-        if child.script.is_none() {
-            child.script = parent.script.clone();
-        } else {
-            if let Some(parent_script) = parent.script {
-                if let Some(child_script) = &mut child.script {
-                    child_script.splice(0..0, parent_script);
-                }
-            }
-        }
-
-        if child.variables.is_none() {
-            child.variables = parent.variables.clone();
-        } else {
-            if let Some(parent_vars) = parent.variables {
-                if let Some(child_vars) = &mut child.variables {
-                    child_vars.extend(parent_vars);
-                }
-            }
-        }
-
-        child
-    }
-
-    pub fn collect_undefined_env_vars(&self) -> Vec<String> {
-        let mut defined_vars: HashMap<String, bool> = HashMap::new();
-        let mut undefined_vars: Vec<String> = Vec::new();
-
-        for job in self.jobs.values() {
-            if let Some(vars) = &job.variables {
-                for key in vars.keys() {
-                    defined_vars.insert(key.clone(), true);
-                }
-            }
-        }
-
-        for job in self.jobs.values() {
-            if let Some(script) = &job.script {
-                for command in script {
-                    for (var, _) in defined_vars.iter() {
-                        if command.contains(&format!("${{{}}}", var)) && !defined_vars.contains_key(var) {
-                            undefined_vars.push(var.clone());
+                    Extends::Multiple(job_names) => {
+                        for job_name in job_names {
+                            if !all_job_names.contains(job_name) {
+                                unresolved_extends.insert(job_name.clone());
+                            }
                         }
                     }
                 }
             }
         }
 
-        undefined_vars
+        unresolved_extends
     }
 }
 
