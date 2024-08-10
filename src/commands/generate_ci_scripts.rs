@@ -1,7 +1,7 @@
 // generator.rs
 use std::{fs};
 use clap::Args;
-use crate::ci_parser::{GitlabCi, parse_gitlab_ci};
+use crate::ci_parser::{parse_gitlab_ci};
 use crate::gen::{GitCiScriptGenerator};
 
 #[derive(Args, Debug)]
