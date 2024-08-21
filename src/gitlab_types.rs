@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use serde_with::DefaultOnError;
 
@@ -1540,7 +1540,6 @@ pub struct CreateUserOptions {
     //#[serde_as(as = "DefaultOnError")]
     //#[serde(default)]
     //pub avatar: Option<Avatar>,
-
     #[serde_as(as = "DefaultOnError")]
     #[serde(default)]
     pub bio: Option<String>,
@@ -1789,4 +1788,3 @@ pub struct AllUserProjectsOptions {
     #[serde(default)]
     pub updated_after: Option<String>,
 }
-

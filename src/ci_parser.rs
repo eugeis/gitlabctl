@@ -1,8 +1,8 @@
-use serde::{de, Deserialize, Deserializer, Serialize};
-use std::collections::{HashMap, BTreeMap, HashSet};
-use std::fmt::{self, Display};
 use serde::de::Visitor;
+use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_yaml::{from_str, from_value, Value};
+use std::collections::{BTreeMap, HashMap, HashSet};
+use std::fmt::{self, Display};
 
 #[derive(Debug, Clone, Serialize)]
 pub enum VariableValue {
@@ -13,8 +13,8 @@ pub enum VariableValue {
 
 impl<'de> Deserialize<'de> for VariableValue {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-            D: Deserializer<'de>,
+    where
+        D: Deserializer<'de>,
     {
         struct VariableValueVisitor;
 
@@ -26,29 +26,29 @@ impl<'de> Deserialize<'de> for VariableValue {
             }
 
             fn visit_bool<E>(self, value: bool) -> Result<Self::Value, E>
-                where
-                    E: de::Error,
+            where
+                E: de::Error,
             {
                 Ok(VariableValue::Bool(value))
             }
 
             fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
-                where
-                    E: de::Error,
+            where
+                E: de::Error,
             {
                 Ok(VariableValue::Int(value as i32))
             }
 
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-                where
-                    E: de::Error,
+            where
+                E: de::Error,
             {
                 Ok(VariableValue::String(value.to_string()))
             }
 
             fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
-                where
-                    E: de::Error,
+            where
+                E: de::Error,
             {
                 Ok(VariableValue::String(value))
             }
@@ -72,7 +72,7 @@ impl Display for VariableValue {
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Variable {
     pub name: String,
-    pub value: String
+    pub value: String,
 }
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
@@ -100,7 +100,10 @@ impl GitlabJob {
         let mut string_vars = Vec::new();
         if let Some(vars) = &self.variables {
             for (key, value) in vars {
-                string_vars.push(Variable{name: key.clone(), value: value.to_string()});
+                string_vars.push(Variable {
+                    name: key.clone(),
+                    value: value.to_string(),
+                });
             }
         }
         string_vars
@@ -173,15 +176,20 @@ pub fn parse_gitlab_ci(yml_content: &str) -> GitlabCi {
         for (key, value) in mapping {
             if let Some(key_str) = key.as_str() {
                 if key_str == "include" {
-                    gitlab_ci.include = from_value(value.clone()).expect("Failed to deserialize 'include' field");
+                    gitlab_ci.include =
+                        from_value(value.clone()).expect("Failed to deserialize 'include' field");
                 } else if key_str == "stages" {
-                    gitlab_ci.stages = Some(value.as_sequence()
-                        .expect("Invalid 'stages' format")
-                        .iter()
-                        .map(|v| v.as_str().expect("Invalid stage name").to_owned())
-                        .collect());
+                    gitlab_ci.stages = Some(
+                        value
+                            .as_sequence()
+                            .expect("Invalid 'stages' format")
+                            .iter()
+                            .map(|v| v.as_str().expect("Invalid stage name").to_owned())
+                            .collect(),
+                    );
                 } else {
-                    let job: GitlabJob = from_value(value.clone()).expect("Failed to deserialize job");
+                    let job: GitlabJob =
+                        from_value(value.clone()).expect("Failed to deserialize job");
                     gitlab_ci.insert_job(key_str.to_owned(), job);
                 }
             }

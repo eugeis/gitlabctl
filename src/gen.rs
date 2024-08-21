@@ -1,16 +1,16 @@
-use std::path::Path;
 use std::fs;
+use std::path::Path;
 
 use crate::common::Result;
 use crate::gitlab::GroupNode;
 use crate::handler::Handler;
 
+use crate::ci_parser::GitlabCi;
 use include_dir::{include_dir, Dir};
-use tera::{Tera, Context};
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::fs::File;
-use crate::ci_parser::GitlabCi;
+use tera::{Context, Tera};
 
 const TEMPLATES_FOLDER: Dir = include_dir!("templates");
 
@@ -19,7 +19,7 @@ lazy_static! {
         let mut tera = Tera::default();
 
         let mut templates: HashMap<String, String> = HashMap::new();
-        
+
         fn load_dir(dir: &Dir, templates: &mut HashMap<String, String>) {
             for entry in dir.entries().into_iter() {
                 match entry.as_file() {
@@ -36,7 +36,7 @@ lazy_static! {
                                 load_dir(dir, templates);
                             }
                             None => {}
-                            
+
                         }
                     }
                 }
@@ -69,7 +69,7 @@ lazy_static! {
 
 pub struct GitScriptGenerator {
     pub templates: Vec<String>,
-    pub gitlab_token_file: String
+    pub gitlab_token_file: String,
 }
 
 impl Handler for GitScriptGenerator {
@@ -113,8 +113,7 @@ impl GitCiScriptGenerator {
     pub fn gen(&self) {
         // Create the output directory if it doesn't exist
         if !Path::new(&self.output_dir).exists() {
-            fs::create_dir_all(&self.output_dir)
-                .expect("Unable to create output directory");
+            fs::create_dir_all(&self.output_dir).expect("Unable to create output directory");
         }
 
         // Create empty script files for unresolved jobs
@@ -137,8 +136,8 @@ impl GitCiScriptGenerator {
 
             let target_file_path_buf = Path::new(&self.output_dir).join(format!("{}.sh", job_name));
 
-            let target_file = File::create(&target_file_path_buf)
-                .expect("Unable to create job file");
+            let target_file =
+                File::create(&target_file_path_buf).expect("Unable to create job file");
 
             make_executable(&target_file_path_buf);
 
@@ -158,7 +157,10 @@ pub fn make_executable(target_file_path: &Path) {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        match fs::set_permissions(target_file_path.as_os_str(), fs::Permissions::from_mode(0o700)) {
+        match fs::set_permissions(
+            target_file_path.as_os_str(),
+            fs::Permissions::from_mode(0o700),
+        ) {
             Err(e) => {
                 println!("can't set permissions to file: {}", e);
             }

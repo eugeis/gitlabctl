@@ -1,7 +1,7 @@
-use clap::Args;
-use crate::handler::{FsModelHandler, Handler};
-use crate::gitlab::GroupNodeReader;
 use crate::gen::GitScriptGenerator;
+use crate::gitlab::GroupNodeReader;
+use crate::handler::{FsModelHandler, Handler};
+use clap::Args;
 
 #[derive(Args, Debug)]
 pub struct GenerateGitScriptsCommand {
@@ -20,8 +20,8 @@ pub struct GenerateGitScriptsCommand {
 
 impl GenerateGitScriptsCommand {
     pub fn run(&self, url: &str, gitlab_token: &str) {
-        let handler = build_script_generator(
-            self.generate_templates.clone(), gitlab_token.to_string());
+        let handler =
+            build_script_generator(self.generate_templates.clone(), gitlab_token.to_string());
 
         let fs_handler = FsModelHandler {
             output_dir: self.output_dir.clone(),
@@ -34,9 +34,7 @@ impl GenerateGitScriptsCommand {
                 for group in &self.groups {
                     println!("read group: {:?}", group);
                     match reader.read(group) {
-                        Ok(node) => {
-                            fs_handler.on_node(&node).expect("can't write model")
-                        },
+                        Ok(node) => fs_handler.on_node(&node).expect("can't write model"),
                         Err(err) => println!("can't read the group '{}': {}", group, err),
                     }
                 }
@@ -47,5 +45,8 @@ impl GenerateGitScriptsCommand {
 }
 
 fn build_script_generator(templates: Vec<String>, gitlab_token_file: String) -> Box<dyn Handler> {
-    Box::new(GitScriptGenerator { templates, gitlab_token_file })
+    Box::new(GitScriptGenerator {
+        templates,
+        gitlab_token_file,
+    })
 }

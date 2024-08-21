@@ -1,9 +1,8 @@
-use clap::Args;
-use ::gitlab::{api, Gitlab};
 use crate::gitlab_types::PipelineSchema;
 use ::gitlab::api::projects::pipelines::{DeletePipeline, Pipelines};
+use ::gitlab::{api, Gitlab};
+use clap::Args;
 use gitlab::api::Query;
-
 
 #[derive(Args, Debug)]
 pub struct DeletePipelinesCommand {

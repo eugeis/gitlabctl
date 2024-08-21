@@ -1,18 +1,22 @@
-use std::path::Path;
 use std::fs;
+use std::path::Path;
 
 use crate::common::Result;
 use crate::gitlab::GroupNode;
 use crate::handler::Handler;
 
 pub struct YamlWriter {
-    pub model_file_name: String
+    pub model_file_name: String,
 }
 
 impl Handler for YamlWriter {
     fn on_node(&self, target_path: &Path, item: &GroupNode) -> Result<()> {
-        write_yaml(Path::new(target_path).
-            join(self.build_model_file_name(item)).as_path(), item)
+        write_yaml(
+            Path::new(target_path)
+                .join(self.build_model_file_name(item))
+                .as_path(),
+            item,
+        )
     }
 }
 
@@ -27,7 +31,10 @@ impl YamlWriter {
     }
 }
 
-pub fn write_yaml<T>(target_file_path: &Path, item: T) -> Result<()> where T:serde::Serialize{
+pub fn write_yaml<T>(target_file_path: &Path, item: T) -> Result<()>
+where
+    T: serde::Serialize,
+{
     let yaml = serde_yaml::to_string(&item)?;
     fs::write(target_file_path, yaml)?;
     println!("File {:?} written", target_file_path);

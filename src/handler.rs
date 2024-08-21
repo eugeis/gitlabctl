@@ -1,8 +1,8 @@
 use std::fs;
 use std::path::Path;
 
-use crate::gitlab::GroupNode;
 use crate::common::Result;
+use crate::gitlab::GroupNode;
 
 pub struct FsModelHandler {
     pub output_dir: String,
@@ -12,9 +12,8 @@ pub struct FsModelHandler {
 }
 
 impl FsModelHandler {
-    pub fn on_node(&self, item: &GroupNode) -> Result<()>{
-        let target_path_buf = Path::new(&self.output_dir).
-            join(&item.relative_root_path);
+    pub fn on_node(&self, item: &GroupNode) -> Result<()> {
+        let target_path_buf = Path::new(&self.output_dir).join(&item.relative_root_path);
 
         let target_path = target_path_buf.as_path();
         fs::create_dir_all(target_path)?;
@@ -22,14 +21,14 @@ impl FsModelHandler {
         let result = self.handler.on_node(target_path, item);
 
         if result.is_err() {
-            return result
+            return result;
         }
 
         if self.handle_children {
             for child in &item.children {
                 let result = self.on_node(child);
                 if result.is_err() {
-                    return result
+                    return result;
                 }
             }
         }

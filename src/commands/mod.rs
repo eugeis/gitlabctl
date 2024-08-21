@@ -1,9 +1,9 @@
 use clap::Subcommand;
 
-pub mod generate_git_scripts;
-pub mod show_pipelines;
 pub mod delete_pipelines;
-pub mod generate_ci_scripts; // New command
+pub mod generate_ci_scripts;
+pub mod generate_git_scripts;
+pub mod show_pipelines; // New command
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {

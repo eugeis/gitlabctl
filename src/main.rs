@@ -1,14 +1,14 @@
+mod ci_parser;
 mod commands;
+mod common;
+mod gen;
 mod gitlab;
 mod gitlab_types;
 mod handler;
-mod common;
-mod gen;
 mod yaml;
-mod ci_parser;
 
-extern crate tera;
 extern crate lazy_static;
+extern crate tera;
 
 use clap::Parser;
 use resolve_path::PathResolveExt;

@@ -1,9 +1,8 @@
-use clap::Args;
-use ::gitlab::{Gitlab};
 use crate::gitlab_types::PipelineSchema;
 use ::gitlab::api::projects::pipelines::Pipelines;
+use ::gitlab::Gitlab;
+use clap::Args;
 use gitlab::api::Query;
-
 
 #[derive(Args, Debug)]
 pub struct ShowPipelinesCommand {

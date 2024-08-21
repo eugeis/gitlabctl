@@ -1,8 +1,8 @@
-use std::io;
 use gitlab::api::ApiError;
 use gitlab::{GitlabError, RestError};
-use thiserror;
 use serde_yaml;
+use std::io;
+use thiserror;
 
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
@@ -10,7 +10,7 @@ pub enum Error {
     #[error("gitlab error: {}", source)]
     GitlabError {
         #[from]
-        source: GitlabError
+        source: GitlabError,
     },
     #[error("general error: {}", source)]
     General {
@@ -23,13 +23,13 @@ pub enum Error {
     #[error("SerdeError")]
     SerdeError {
         #[from]
-        source: serde_yaml::Error
+        source: serde_yaml::Error,
     },
 
     #[error("IoError")]
     IoError {
         #[from]
-        source: io::Error
+        source: io::Error,
     },
 }
 
