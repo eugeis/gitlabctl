@@ -12,8 +12,8 @@ source .env.sh
 
 {% if variables -%}
 # Variables
-{%- for var_name, var_value in variables %}
-export {{ var_name }}="{{ var_value }}"
+{%- for variable in variables %}
+export {{ variable.name }}="{{ variable.value }}"
 {%- endfor %}
 {%- endif %}
 

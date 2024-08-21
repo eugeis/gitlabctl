@@ -1,6 +1,5 @@
-// parser.rs
 use serde::{de, Deserialize, Deserializer, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, BTreeMap, HashSet};
 use std::fmt::{self, Display};
 use serde::de::Visitor;
 use serde_yaml::{from_str, from_value, Value};
@@ -26,6 +25,20 @@ impl<'de> Deserialize<'de> for VariableValue {
                 formatter.write_str("a string, an integer, or a boolean")
             }
 
+            fn visit_bool<E>(self, value: bool) -> Result<Self::Value, E>
+                where
+                    E: de::Error,
+            {
+                Ok(VariableValue::Bool(value))
+            }
+
+            fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
+                where
+                    E: de::Error,
+            {
+                Ok(VariableValue::Int(value as i32))
+            }
+
             fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
                 where
                     E: de::Error,
@@ -38,20 +51,6 @@ impl<'de> Deserialize<'de> for VariableValue {
                     E: de::Error,
             {
                 Ok(VariableValue::String(value))
-            }
-
-            fn visit_i64<E>(self, value: i64) -> Result<Self::Value, E>
-                where
-                    E: de::Error,
-            {
-                Ok(VariableValue::Int(value as i32))
-            }
-
-            fn visit_bool<E>(self, value: bool) -> Result<Self::Value, E>
-                where
-                    E: de::Error,
-            {
-                Ok(VariableValue::Bool(value))
             }
         }
 
@@ -71,6 +70,12 @@ impl Display for VariableValue {
 }
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Variable {
+    pub name: String,
+    pub value: String
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
 #[serde(untagged)]
 pub enum Extends {
     Single(String),
@@ -81,7 +86,7 @@ pub enum Extends {
 pub struct GitlabJob {
     pub script: Option<Vec<String>>,
     pub extends: Option<Extends>,
-    pub variables: Option<HashMap<String, VariableValue>>,
+    pub variables: Option<BTreeMap<String, VariableValue>>,
     pub stage: Option<String>,
     pub when: Option<String>,
     pub only: Option<HashMap<String, Vec<String>>>,
@@ -91,11 +96,11 @@ pub struct GitlabJob {
 }
 
 impl GitlabJob {
-    pub fn variables_as_strings(&self) -> HashMap<String, String> {
-        let mut string_vars = HashMap::new();
+    pub fn variables_as_strings(&self) -> Vec<Variable> {
+        let mut string_vars = Vec::new();
         if let Some(vars) = &self.variables {
             for (key, value) in vars {
-                string_vars.insert(key.clone(), value.to_string());
+                string_vars.push(Variable{name: key.clone(), value: value.to_string()});
             }
         }
         string_vars
@@ -112,7 +117,7 @@ pub struct Image {
 pub struct GitlabCi {
     pub include: Option<Vec<Include>>,
     pub stages: Option<Vec<String>>,
-    pub jobs: HashMap<String, GitlabJob>,
+    pub jobs: BTreeMap<String, GitlabJob>,
 }
 
 impl GitlabCi {
