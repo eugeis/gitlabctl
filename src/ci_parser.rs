@@ -3,6 +3,7 @@ use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_yaml::{from_str, from_value, Value};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::{self, Display};
+use indexmap::IndexMap;
 
 #[derive(Debug, Clone, Serialize)]
 pub enum VariableValue {
@@ -86,7 +87,7 @@ pub enum Extends {
 pub struct GitlabJob {
     pub script: Option<Vec<String>>,
     pub extends: Option<Extends>,
-    pub variables: Option<BTreeMap<String, VariableValue>>,
+    pub variables: Option<IndexMap<String, VariableValue>>,
     pub stage: Option<String>,
     pub when: Option<String>,
     pub only: Option<HashMap<String, Vec<String>>>,
