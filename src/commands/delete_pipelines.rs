@@ -7,7 +7,7 @@ use gitlab::api::Query;
 #[derive(Args, Debug)]
 pub struct DeletePipelinesCommand {
     /// Project path to delete pipelines from
-    #[arg(short, long)]
+    #[arg(short = 'p', long)]
     pub project_path: String,
 }
 

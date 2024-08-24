@@ -1,9 +1,9 @@
+use indexmap::IndexMap;
 use serde::de::Visitor;
 use serde::{de, Deserialize, Deserializer, Serialize};
 use serde_yaml::{from_str, from_value, Value};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt::{self, Display};
-use indexmap::IndexMap;
 
 #[derive(Debug, Clone, Serialize)]
 pub enum VariableValue {
@@ -165,7 +165,7 @@ pub struct Include {
 }
 
 pub fn parse_gitlab_ci(yml_content: &str) -> GitlabCi {
-    let yaml_value: Value = from_str(&yml_content).expect("Unable to parse gitlab-ci.yml file");
+    let yaml_value: Value = from_str(yml_content).expect("Unable to parse gitlab-ci.yml file");
 
     let mut gitlab_ci: GitlabCi = GitlabCi {
         include: None,

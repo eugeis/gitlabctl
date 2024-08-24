@@ -21,7 +21,7 @@ lazy_static! {
         let mut templates: HashMap<String, String> = HashMap::new();
 
         fn load_dir(dir: &Dir, templates: &mut HashMap<String, String>) {
-            for entry in dir.entries().into_iter() {
+            for entry in dir.entries().iter() {
                 match entry.as_file() {
                     Some(file) => {
                         let file_name = file.path().to_string_lossy().to_string();
@@ -31,13 +31,9 @@ lazy_static! {
                         templates.insert(template_name, content.to_string());
                     }
                     None => {
-                        match entry.as_dir() {
-                            Some(dir) => {
-                                load_dir(dir, templates);
-                            }
-                            None => {}
-
-                        }
+                         if let Some(dir) = entry.as_dir() {
+                            load_dir(dir, templates);
+                         }
                     }
                 }
             }
@@ -46,22 +42,16 @@ lazy_static! {
 
         //println!("register templates first time in order to load templates without dependencies");
         for (name, content) in &templates {
-            match tera.add_raw_template(name.as_str() , content.as_str()) {
-                Err(_) => {
-                    //println!("can't add template, the first time: {}", e);
-                },
-                _ => {}
-            }
+             if tera.add_raw_template(name.as_str() , content.as_str()).is_err() {
+                 //println!("can't add template, the first time: {}", e);
+             }
         }
 
         //println!("register templates second time in order to resolve dependencies");
         for (name, content) in &templates {
-            match tera.add_raw_template(name.as_str() , content.as_str()) {
-                Err(e) => {
-                    println!("can't add template, the second time: {}", e);
-                }
-                _ => {}
-            }
+            if let Err(e) = tera.add_raw_template(name.as_str() , content.as_str()) {
+               println!("can't add template, the second time: {}", e);
+             }
         }
         tera
     };
@@ -86,11 +76,10 @@ impl Handler for GitScriptGenerator {
 
             make_executable(target_file_path);
 
-            match TERA.render_to(format!("git/{}", &template).as_str(), &context, target_file) {
-                Err(e) => {
-                    println!("can't render file: {}", e);
-                }
-                _ => {}
+            if let Err(e) =
+                TERA.render_to(format!("git/{}", &template).as_str(), &context, target_file)
+            {
+                println!("can't render file: {}", e);
             };
         }
         Ok(())
@@ -157,14 +146,11 @@ pub fn make_executable(target_file_path: &Path) {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        match fs::set_permissions(
+        if let Err(e) = fs::set_permissions(
             target_file_path.as_os_str(),
             fs::Permissions::from_mode(0o700),
         ) {
-            Err(e) => {
-                println!("can't set permissions to file: {}", e);
-            }
-            _ => {}
+            println!("can't set permissions to file: {}", e);
         }
     }
 }

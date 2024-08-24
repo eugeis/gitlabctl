@@ -22,12 +22,11 @@ impl Handler for YamlWriter {
 
 impl YamlWriter {
     fn build_model_file_name(&self, item: &GroupNode) -> String {
-        let file_name = if self.model_file_name != "" {
+        if !self.model_file_name.is_empty() {
             self.model_file_name.clone()
         } else {
             format!("{:?}.yaml", item.group.id.to_string())
-        };
-        file_name
+        }
     }
 }
 
@@ -38,5 +37,5 @@ where
     let yaml = serde_yaml::to_string(&item)?;
     fs::write(target_file_path, yaml)?;
     println!("File {:?} written", target_file_path);
-    return Ok(());
+    Ok(())
 }

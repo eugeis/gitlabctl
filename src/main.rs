@@ -30,15 +30,17 @@ pub struct Args {
 
 fn main() {
     let args = Args::parse();
-    let gitlab_token_file_path = args.token_file.resolve();
-    let gitlab_token: String = std::fs::read_to_string(gitlab_token_file_path)
+    let path = args.token_file.resolve();
+    let gitlab_token_file = path.to_str().unwrap();
+
+    let gitlab_token: String = std::fs::read_to_string(gitlab_token_file)
         .expect("can't read gitlab token file")
         .trim()
         .to_string();
 
     match &args.command {
         commands::Commands::GenerateGitScripts(cmd) => {
-            cmd.run(&args.url, &gitlab_token);
+            cmd.run(&args.url, gitlab_token_file, &gitlab_token);
         }
         commands::Commands::ShowPipelines(cmd) => {
             cmd.run(&args.url, &gitlab_token);

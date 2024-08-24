@@ -7,7 +7,7 @@ use gitlab::api::Query;
 #[derive(Args, Debug)]
 pub struct ShowPipelinesCommand {
     /// Project path to show pipelines for
-    #[arg(short, long)]
+    #[arg(short = 'p', long)]
     pub project_path: String,
 }
 

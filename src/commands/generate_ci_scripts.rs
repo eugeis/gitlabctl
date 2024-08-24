@@ -6,16 +6,17 @@ use std::fs;
 
 #[derive(Args, Debug)]
 pub struct GenerateCiScriptsCommand {
-    #[arg(short, long)]
-    pub yml_file: String,
-    #[arg(short, long, default_value = ".")]
+    #[arg(short = 'f', long, default_value = "gitlab-ci.yml")]
+    pub file_ci_yaml: String,
+    #[arg(short = 'o', long, default_value = ".")]
     pub output_dir: String,
 }
 
 impl GenerateCiScriptsCommand {
     pub fn run(&self) {
-        let yml_content =
-            fs::read_to_string(&self.yml_file).expect("Unable to read gitlab-ci.yml file");
+        let yml_content = fs::read_to_string(&self.file_ci_yaml).unwrap_or_else(|err| {
+            panic!("Unable to read {} file: {}", &self.file_ci_yaml, err);
+        });
 
         let gitlab_ci = parse_gitlab_ci(&yml_content);
 

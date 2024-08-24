@@ -6,22 +6,24 @@ use clap::Args;
 #[derive(Args, Debug)]
 pub struct GenerateGitScriptsCommand {
     /// Gitlab Groups to read
-    #[arg(short, long, value_parser, num_args = 1.., value_delimiter = ',', required = true)]
+    #[arg(short = 'g', long, value_parser, num_args = 1.., value_delimiter = ',', required = true)]
     pub groups: Vec<String>,
 
     /// Base dir for generation
-    #[arg(short, long, default_value = ".")]
+    #[arg(short = 'o', long, default_value = ".")]
     pub output_dir: String,
 
     /// Generate Git scripts
-    #[arg(long, default_value = "clone.sh,pull.sh,status.sh,scripts.sh", value_delimiter = ',', num_args = 1..)]
+    #[arg(long="templates", default_value = "clone.sh,pull.sh,status.sh,scripts.sh", value_delimiter = ',', num_args = 1..)]
     pub generate_templates: Vec<String>,
 }
 
 impl GenerateGitScriptsCommand {
-    pub fn run(&self, url: &str, gitlab_token: &str) {
-        let handler =
-            build_script_generator(self.generate_templates.clone(), gitlab_token.to_string());
+    pub fn run(&self, url: &str, gitlab_token_file: &str, gitlab_token: &str) {
+        let handler = build_script_generator(
+            self.generate_templates.clone(),
+            gitlab_token_file.to_string(),
+        );
 
         let fs_handler = FsModelHandler {
             output_dir: self.output_dir.clone(),

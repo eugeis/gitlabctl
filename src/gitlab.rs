@@ -29,7 +29,7 @@ impl GroupNode {
     fn set_children_relative_root_path(&mut self) {
         for child in self.children.iter_mut() {
             child.relative_root_path = Path::new(&self.relative_root_path)
-                .join(&child.group.path.clone())
+                .join(&child.group.path)
                 .into_os_string()
                 .into_string()
                 .unwrap();
@@ -62,7 +62,7 @@ impl GroupNodeReader {
                 ignore_group_names: Default::default(),
                 already_handled_groups: Default::default(),
             }),
-            Err(err) => Err(Error::GitlabError { source: err }),
+            Err(err) => Err(Error::Gitlab { source: err }),
         }
     }
 
@@ -92,7 +92,7 @@ impl GroupNodeReader {
     }
 
     fn read_for_group_detail(&mut self, group: ExpandedGroupSchema) -> Result<GroupNode> {
-        self.mark_as_already_handled(group.id.clone());
+        self.mark_as_already_handled(group.id);
 
         let group_id = &group.id.clone();
 
@@ -138,7 +138,7 @@ impl GroupNodeReader {
         }
 
         let group_detail: ExpandedGroupSchema = groups::Group::builder()
-            .group(group_id.clone())
+            .group(*group_id)
             .build()
             .unwrap()
             .query(&self.gitlab)?;
@@ -148,7 +148,7 @@ impl GroupNodeReader {
 
     fn read_sub_groups(&mut self, group_id: &u64, mut on_child: impl FnMut(GroupNode)) {
         let sub_groups: Vec<SimpleGroupSchema> = subgroups::GroupSubgroups::builder()
-            .group(group_id.clone())
+            .group(*group_id)
             .build()
             .unwrap()
             .query(&self.gitlab)
@@ -163,10 +163,10 @@ impl GroupNodeReader {
     }
 
     fn shall_read_group(&mut self, group_id: &u64, group_name: &str) -> bool {
-        let ret = !self.already_handled_groups.contains(&group_id)
+        let ret = !self.already_handled_groups.contains(group_id)
             && !self.ignore_group_names.contains(group_name);
         if ret {
-            self.mark_as_already_handled(group_id.clone())
+            self.mark_as_already_handled(*group_id)
         }
         ret
     }

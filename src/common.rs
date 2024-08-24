@@ -1,14 +1,12 @@
 use gitlab::api::ApiError;
 use gitlab::{GitlabError, RestError};
-use serde_yaml;
 use std::io;
-use thiserror;
 
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum Error {
     #[error("gitlab error: {}", source)]
-    GitlabError {
+    Gitlab {
         #[from]
         source: GitlabError,
     },
@@ -21,13 +19,13 @@ pub enum Error {
     AlreadyHandled,
 
     #[error("SerdeError")]
-    SerdeError {
+    Serde {
         #[from]
         source: serde_yaml::Error,
     },
 
     #[error("IoError")]
-    IoError {
+    Io {
         #[from]
         source: io::Error,
     },
