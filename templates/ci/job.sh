@@ -2,10 +2,10 @@
 # This file is generated, do not update manually
 
 {%- if not is_template %}
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-ME="$(basename "$0")"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+WORKING_DIR="$SCRIPT_DIR/.."
 
-pushd "$DIR" || exit 1
+pushd "$SCRIPT_DIR" || exit 1
 
 source .env.sh
 {% endif %}
@@ -29,17 +29,21 @@ source {{ job.extends }}.sh
 {%- endif %}
 
 {%- if job.before_script %}
+pushd "$WORKING_DIR" || exit 1
 # Before Script
 {%- for command in job.before_script %}
 {{ command }}
 {%- endfor %}
+popd || exit 1
 {%- endif %}
 
 {%- if job.script %}
+pushd "$WORKING_DIR" || exit 1
 # Script
 {%- for command in job.script %}
 {{ command }}
 {%- endfor %}
+popd || exit 1
 {%- endif %}
 
 {% if not is_template %}

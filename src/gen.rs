@@ -25,10 +25,13 @@ lazy_static! {
                 match entry.as_file() {
                     Some(file) => {
                         let file_name = file.path().to_string_lossy().to_string();
-                        let content = file.contents_utf8().expect("Unable to open file");
-                        let template_name = file_name.to_string();
-                        println!("load template: {}", template_name);
-                        templates.insert(template_name, content.to_string());
+                        let content = file.contents_utf8().unwrap_or("");
+
+                        if !content.is_empty() {
+                            let template_name = file_name.to_string();
+                            println!("load template: {}", template_name);
+                            templates.insert(template_name, content.to_string());
+                        }
                     }
                     None => {
                          if let Some(dir) = entry.as_dir() {
@@ -86,14 +89,14 @@ impl Handler for GitScriptGenerator {
     }
 }
 
-pub struct GitCiScriptGenerator {
+pub struct GitlabCiScriptGenerator {
     ci: GitlabCi,
     output_dir: String,
 }
 
-impl GitCiScriptGenerator {
+impl GitlabCiScriptGenerator {
     pub fn new(ci: GitlabCi, output_dir: &str) -> Self {
-        GitCiScriptGenerator {
+        GitlabCiScriptGenerator {
             ci,
             output_dir: output_dir.to_string(),
         }

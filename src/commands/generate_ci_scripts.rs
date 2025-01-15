@@ -1,14 +1,14 @@
 // generator.rs
 use crate::ci_parser::parse_gitlab_ci;
-use crate::gen::GitCiScriptGenerator;
+use crate::gen::GitlabCiScriptGenerator;
 use clap::Args;
 use std::fs;
 
 #[derive(Args, Debug)]
 pub struct GenerateCiScriptsCommand {
-    #[arg(short = 'f', long, default_value = "gitlab-ci.yml")]
+    #[arg(short = 'f', long, default_value = ".gitlab-ci.yml")]
     pub file_ci_yaml: String,
-    #[arg(short = 'o', long, default_value = ".")]
+    #[arg(short = 'o', long, default_value = "_scripts")]
     pub output_dir: String,
 }
 
@@ -20,6 +20,6 @@ impl GenerateCiScriptsCommand {
 
         let gitlab_ci = parse_gitlab_ci(&yml_content);
 
-        GitCiScriptGenerator::new(gitlab_ci, &self.output_dir).gen();
+        GitlabCiScriptGenerator::new(gitlab_ci, &self.output_dir).gen();
     }
 }
