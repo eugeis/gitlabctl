@@ -17,13 +17,5 @@ git {{ gitAction }} {{ project.ssh_url_to_repo }}
   {%- endfor %}
 {%- endif  %}
 
-{%- set childrenLength = groupNode.children | length %}
-{% if childrenLength > 0 %}
-echo "git {{ gitActionLabel }} {{ childrenLength }} sub-groups of {{ groupNode.group.full_path }}"
-  {%- for subGroup in groupNode.children %}
-"{{ subGroup.group.path }}/$ME"
-  {%- endfor  %}
-{%- endif %}
-
 popd || exit 1
 {% endmacro git_script %}

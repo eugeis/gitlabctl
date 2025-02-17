@@ -14,7 +14,7 @@ pub struct GenerateGitScriptsCommand {
     pub output_dir: String,
 
     /// Generate Git scripts
-    #[arg(long="templates", default_value = "clone.sh,pull.sh,status.sh,scripts.sh", value_delimiter = ',', num_args = 1..)]
+    #[arg(long="templates", default_value = "clone.sh,pull.sh,clone-recursive.sh,pull-recursive.sh,scripts.sh", value_delimiter = ',', num_args = 1..)]
     pub generate_templates: Vec<String>,
 }
 

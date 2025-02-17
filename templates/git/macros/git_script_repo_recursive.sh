@@ -1,4 +1,4 @@
-{%- macro git_script_repo(gitActionLabel, gitAction, groupNode) -%}
+{%- macro git_script_repo_recursive(gitActionLabel, gitAction, groupNode) -%}
 #!/bin/bash
 # This file is generated, do not update manually
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -17,5 +17,13 @@ git -C {{ project.path }} {{ gitAction }}
   {%- endfor %}
 {%- endif  %}
 
+{%- set childrenLength = groupNode.children | length %}
+{% if childrenLength > 0 %}
+echo "git {{ gitActionLabel }} {{ childrenLength }} sub-groups of {{ groupNode.group.full_path }}"
+  {%- for subGroup in groupNode.children %}
+"{{ subGroup.group.path }}/$ME"
+  {%- endfor %}
+{%- endif %}
+
 popd || exit 1
-{% endmacro git_script_repo %}
+{% endmacro git_script_repo_recursive %}
