@@ -13,10 +13,16 @@ pub struct DeletePipelinesCommand {
 
 impl DeletePipelinesCommand {
     pub fn run(&self, url: &str, gitlab_token: &str) {
+        let current_path: &str = if let Some(pos) = self.project_path.rfind(url) {
+            &self.project_path[pos + url.len() + 1..]
+        } else {
+            &self.project_path
+        };
+        println!("looking for project {:?}", &current_path);
         match Gitlab::new(url, gitlab_token) {
             Ok(gitlab) => {
                 let pipelines: Vec<PipelineSchema> = Pipelines::builder()
-                    .project(&self.project_path)
+                    .project(current_path)
                     .build()
                     .unwrap()
                     .query(&gitlab)
@@ -26,7 +32,7 @@ impl DeletePipelinesCommand {
                     println!("Deleting pipeline {:?}", pipeline.id);
 
                     let endpoint = DeletePipeline::builder()
-                        .project(&self.project_path)
+                        .project(current_path)
                         .pipeline(pipeline.id)
                         .build()
                         .unwrap();
