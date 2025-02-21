@@ -94,6 +94,12 @@ pub struct GitlabJob {
     pub needs: Option<Vec<String>>,
     pub image: Option<Image>,
     pub before_script: Option<Vec<String>>,
+    pub parallel: Option<Parallel>,
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Parallel {
+    pub matrix: Vec<String>,
 }
 
 impl GitlabJob {
@@ -121,6 +127,7 @@ pub struct Image {
 pub struct GitlabCi {
     pub include: Option<Vec<Include>>,
     pub stages: Option<Vec<String>>,
+    pub matrices: Option<IndexMap<String, IndexMap<String, VariableValue>>>,
     pub jobs: BTreeMap<String, GitlabJob>,
 }
 
@@ -170,6 +177,7 @@ pub fn parse_gitlab_ci(yml_content: &str) -> GitlabCi {
     let mut gitlab_ci: GitlabCi = GitlabCi {
         include: None,
         stages: Default::default(),
+        matrices: Default::default(),
         jobs: Default::default(),
     };
 
@@ -189,9 +197,19 @@ pub fn parse_gitlab_ci(yml_content: &str) -> GitlabCi {
                             .collect(),
                     );
                 } else {
-                    let job: GitlabJob =
-                        from_value(value.clone()).expect("Failed to deserialize job");
-                    gitlab_ci.insert_job(key_str.to_owned(), job);
+                    match from_value::<GitlabJob>(value.clone()) {
+                        Ok(job) => gitlab_ci.insert_job(key_str.to_owned(), job),
+                        Err(_) => match from_value::<IndexMap<String, VariableValue>>(value.clone()) {
+                            Ok(matrix) => {
+                                let mut matrices = IndexMap::new();
+                                matrices.insert(key_str.to_owned(), matrix);
+                                gitlab_ci.matrices = Some(matrices);
+                            }
+                            Err(e) => {
+                                eprintln!("Failed to deserialize job or matrix: {}", e)
+                            },
+                        },
+                    }
                 }
             }
         }
