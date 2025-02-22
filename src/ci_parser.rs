@@ -175,6 +175,15 @@ impl GitlabJob {
     }
 }
 
+pub fn variables_as_string_fill(string_vars: &mut Vec<Variable>, vars: &IndexMap<String, VariableValue>) {
+    for (key, value) in vars {
+        string_vars.push(Variable {
+            name: key.clone(),
+            value: value.to_string(),
+        });
+    }
+}
+
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Image {
     pub name: String,

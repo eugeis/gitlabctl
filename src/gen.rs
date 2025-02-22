@@ -5,7 +5,7 @@ use crate::common::Result;
 use crate::gitlab::GroupNode;
 use crate::handler::Handler;
 
-use crate::ci_parser::GitlabCi;
+use crate::ci_parser::{variables_as_string_fill, GitlabCi};
 use include_dir::{include_dir, Dir};
 use lazy_static::lazy_static;
 use std::collections::HashMap;
@@ -29,7 +29,7 @@ lazy_static! {
 
                         if !content.is_empty() {
                             let template_name = file_name.to_string();
-                            println!("load template: {}", template_name);
+                            //println!("load template: {}", template_name);
                             templates.insert(template_name, content.to_string());
                         }
                     }
@@ -115,6 +115,34 @@ impl GitlabCiScriptGenerator {
                 File::create(&target_file_path_buf)
                     .expect("Unable to create empty script file for unresolved job");
                 println!("Empty script file created: {:?}", &target_file_path_buf);
+            }
+        }
+
+        if let Some(matrices) = &self.ci.matrices {
+            // Generate script files for all defined jobs
+            for (matrix_name, variables) in matrices.iter() {
+                let mut context = Context::new();
+                context.insert("matrix_name", matrix_name);
+
+                let mut string_vars = Vec::new();
+                variables_as_string_fill(&mut string_vars, &variables);
+                context.insert("variables", &string_vars);
+
+                let target_file_path_buf = Path::new(&self.output_dir).join(format!("{}.sh", matrix_name));
+
+                let target_file =
+                    File::create(&target_file_path_buf).expect("Unable to create job file");
+
+                make_executable(&target_file_path_buf);
+
+                match TERA.render_to("ci/matrix.sh", &context, &target_file) {
+                    Err(e) => {
+                        println!("can't render file: {}", e);
+                    }
+                    _ => {
+                        println!("file generated: {:?}", &target_file_path_buf);
+                    }
+                };
             }
         }
 
