@@ -199,10 +199,12 @@ pub fn parse_gitlab_ci(yml_content: &str) -> GitlabCi {
                 } else {
                     match from_value::<GitlabJob>(value.clone()) {
                         Ok(job) => gitlab_ci.insert_job(key_str.to_owned(), job),
-                        Err(_) => match from_value::<IndexMap<String, VariableValue>>(value.clone()) {
-                            Ok(matrix) => {
+                        Err(_) => match from_value::<Vec<IndexMap<String, VariableValue>>>(value.clone()) {
+                            Ok(matrix_vec) => {
                                 let mut matrices = IndexMap::new();
-                                matrices.insert(key_str.to_owned(), matrix);
+                                for (i, matrix) in matrix_vec.into_iter().enumerate() {
+                                    matrices.insert(format!("{}_{}", key_str, i), matrix);
+                                }
                                 gitlab_ci.matrices = Some(matrices);
                             }
                             Err(e) => {
