@@ -83,7 +83,7 @@ pub enum Extends {
     Multiple(Vec<String>),
 }
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct GitlabJob {
     pub script: Option<Vec<String>>,
     pub extends: Option<Extends>,
@@ -94,12 +94,70 @@ pub struct GitlabJob {
     pub needs: Option<Vec<String>>,
     pub image: Option<Image>,
     pub before_script: Option<Vec<String>>,
-    pub parallel: Option<Parallel>,
+    pub parallel: Option<ParallelField>,
+}
+
+impl<'de> Deserialize<'de> for GitlabJob {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        struct RawGitlabJob {
+            script: Option<Vec<String>>,
+            extends: Option<Extends>,
+            variables: Option<IndexMap<String, VariableValue>>,
+            stage: Option<String>,
+            when: Option<String>,
+            only: Option<HashMap<String, Vec<String>>>,
+            needs: Option<Vec<String>>,
+            image: Option<Image>,
+            before_script: Option<Vec<String>>,
+            parallel: Option<Value>, // Deserialize parallel as a Value first
+        }
+
+        let raw_job = RawGitlabJob::deserialize(deserializer)?;
+
+        let parallel_field = raw_job.parallel.map(|parallel_value| {
+            from_value::<ParallelField>(parallel_value.clone())
+                .or_else(|_| from_value::<ParallelReference>(parallel_value.clone())
+                    .map(ParallelField::ParallelReference))
+                .or_else(|_| from_value::<ParallelValues>(parallel_value.clone())
+                    .map(ParallelField::ParallelValues))
+                .map_err(de::Error::custom)
+        }).transpose()?;
+
+        Ok(GitlabJob {
+            script: raw_job.script,
+            extends: raw_job.extends,
+            variables: raw_job.variables,
+            stage: raw_job.stage,
+            when: raw_job.when,
+            only: raw_job.only,
+            needs: raw_job.needs,
+            image: raw_job.image,
+            before_script: raw_job.before_script,
+            parallel: parallel_field,
+        })
+    }
+}
+
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+#[serde(untagged)]
+pub enum ParallelField {
+    ParallelReference(ParallelReference),
+    ParallelValues(ParallelValues),
 }
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
-pub struct Parallel {
+pub struct ParallelReference {
     pub matrix: Vec<String>,
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct ParallelValues {
+    pub matrix: Vec<HashMap<String, String>>,
 }
 
 impl GitlabJob {
