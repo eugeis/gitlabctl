@@ -203,24 +203,6 @@ impl GitlabCi {
         self.jobs.insert(name, job);
     }
 
-    pub fn get_parallel_for_job(&self, job: &GitlabJob) -> Option<Vec<BTreeMap<String, VariableValue>>> {
-        if let Some(parallel) = &job.parallel {
-            if let ParallelField::Reference(parallel_reference) = parallel {
-                // Only first matrix is supported
-                if let Some(matrix_key) = parallel_reference.matrix.first() {
-                    if let Some(ret) = self.matrices.as_ref().and_then(|matrices| {
-                        matrices.get(matrix_key)
-                    }) {
-                        return Some(ret.clone());
-                    }
-                }
-            } else if let ParallelField::Matrix(parallel_values) = parallel {
-                return Some(parallel_values.matrix.clone());
-            }
-        }
-        None
-    }
-
     pub fn collect_unresolved_extends(&self) -> HashSet<String> {
         let mut unresolved_extends = HashSet::new();
         let all_job_names: HashSet<_> = self.jobs.keys().cloned().collect();

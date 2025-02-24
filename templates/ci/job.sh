@@ -13,23 +13,22 @@ source .env.sh
 # Variables
 {%- for variable in variables %}
 export {{ variable.name }}="{{ variable.value }}"
-
 {%- endfor %}
-{%- endif %}
+{% endif -%}
 {%- if parallel %}
 source {{ parallel }}.sh
-{%- endif %}
+{% endif -%}
 {% if job.extends -%}
-# Extends
+
 {%- if job.extends is iterable %}
+# Extends
 {%- for parent in job.extends %}
 source {{ parent }}.sh
-{% endfor %}
+{% endfor -%}
 {% else %}
 source {{ job.extends }}.sh
 {%- endif %}
-{%- endif %}
-
+{% endif -%}
 {%- if job.before_script %}
 pushd "$WORKING_DIR" || exit 1
 # Before Script

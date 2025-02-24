@@ -129,26 +129,26 @@ impl GitlabCiScriptGenerator {
 
         // Generate script files for all defined jobs
         for (job_name, job) in self.ci.jobs.iter() {
-            let matrix_name = format!("{}_matrix", job_name);
             if let Some(parallel) = &job.parallel {
-                let (matrix_name, matrix_length) = if let ParallelField::Reference(reference) = parallel {
-                    // Only first matrix is supported for now
-                    let matrix_name = reference.matrix.first().unwrap();
-                    if let Some(matrix) = self.ci.matrices.as_ref().and_then(|matrices| {
-                        matrices.get(matrix_name)
-                    }) {
-                        (matrix_name.clone(), matrix.len())
-                    } else {
-                        (matrix_name.clone(), 0)
+                let (matrix_name, matrix_length) = match parallel {
+                    ParallelField::Reference(reference) => {
+                        // Only first matrix is supported for now
+                        let matrix_name = reference.matrix.first().unwrap();
+                        if let Some(matrix) = self.ci.matrices.as_ref().and_then(|matrices| {
+                            matrices.get(matrix_name)
+                        }) {
+                            (matrix_name.clone(), matrix.len())
+                        } else {
+                            (matrix_name.clone(), 0)
+                        }
                     }
-                } else if let ParallelField::Matrix(parallel_matrix) = parallel {
-                    let matrix_name = format!("{}_matrix", job_name);
-                    for (index, variables) in parallel_matrix.matrix.iter().enumerate() {
-                        self.gen_matrix(&format!("{}_{}", matrix_name, index), &variables);
+                    ParallelField::Matrix(parallel_matrix) => {
+                        let matrix_name = format!("{}_matrix", job_name);
+                        for (index, variables) in parallel_matrix.matrix.iter().enumerate() {
+                            self.gen_matrix(&format!("{}_{}", matrix_name, index), &variables);
+                        }
+                        (matrix_name, parallel_matrix.matrix.len())
                     }
-                    (matrix_name, parallel_matrix.matrix.len())
-                } else {
-                    ("".to_string(), 0)
                 };
 
                 for index in 0..matrix_length {
