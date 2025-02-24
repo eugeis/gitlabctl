@@ -8,15 +8,17 @@ WORKING_DIR="$SCRIPT_DIR/.."
 pushd "$SCRIPT_DIR" || exit 1
 
 source .env.sh
-{% endif %}
-
-{% if variables -%}
+{% endif -%}
+{%- if variables %}
 # Variables
 {%- for variable in variables %}
 export {{ variable.name }}="{{ variable.value }}"
+
 {%- endfor %}
 {%- endif %}
-
+{%- if parallel %}
+source {{ parallel }}.sh
+{%- endif %}
 {% if job.extends -%}
 # Extends
 {%- if job.extends is iterable %}

@@ -87,7 +87,7 @@ pub enum Extends {
 pub struct GitlabJob {
     pub script: Option<Vec<String>>,
     pub extends: Option<Extends>,
-    pub variables: Option<IndexMap<String, VariableValue>>,
+    pub variables: Option<BTreeMap<String, VariableValue>>,
     pub stage: Option<String>,
     pub when: Option<String>,
     pub only: Option<HashMap<String, Vec<String>>>,
@@ -106,7 +106,7 @@ impl<'de> Deserialize<'de> for GitlabJob {
         struct RawGitlabJob {
             script: Option<Vec<String>>,
             extends: Option<Extends>,
-            variables: Option<IndexMap<String, VariableValue>>,
+            variables: Option<BTreeMap<String, VariableValue>>,
             stage: Option<String>,
             when: Option<String>,
             only: Option<HashMap<String, Vec<String>>>,
@@ -121,9 +121,9 @@ impl<'de> Deserialize<'de> for GitlabJob {
         let parallel_field = raw_job.parallel.map(|parallel_value| {
             from_value::<ParallelField>(parallel_value.clone())
                 .or_else(|_| from_value::<ParallelReference>(parallel_value.clone())
-                    .map(ParallelField::ParallelReference))
-                .or_else(|_| from_value::<ParallelValues>(parallel_value.clone())
-                    .map(ParallelField::ParallelValues))
+                    .map(ParallelField::Reference))
+                .or_else(|_| from_value::<ParallelMatrix>(parallel_value.clone())
+                    .map(ParallelField::Matrix))
                 .map_err(de::Error::custom)
         }).transpose()?;
 
@@ -146,8 +146,8 @@ impl<'de> Deserialize<'de> for GitlabJob {
 #[derive(Debug, Deserialize, Clone, Serialize)]
 #[serde(untagged)]
 pub enum ParallelField {
-    ParallelReference(ParallelReference),
-    ParallelValues(ParallelValues),
+    Reference(ParallelReference),
+    Matrix(ParallelMatrix),
 }
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
@@ -156,8 +156,8 @@ pub struct ParallelReference {
 }
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
-pub struct ParallelValues {
-    pub matrix: Vec<HashMap<String, String>>,
+pub struct ParallelMatrix {
+    pub matrix: Vec<BTreeMap<String, VariableValue>>,
 }
 
 impl GitlabJob {
@@ -175,7 +175,7 @@ impl GitlabJob {
     }
 }
 
-pub fn variables_as_string_fill(string_vars: &mut Vec<Variable>, vars: &IndexMap<String, VariableValue>) {
+pub fn variables_as_string_fill(string_vars: &mut Vec<Variable>, vars: &BTreeMap<String, VariableValue>) {
     for (key, value) in vars {
         string_vars.push(Variable {
             name: key.clone(),
@@ -194,13 +194,31 @@ pub struct Image {
 pub struct GitlabCi {
     pub include: Option<Vec<Include>>,
     pub stages: Option<Vec<String>>,
-    pub matrices: Option<IndexMap<String, IndexMap<String, VariableValue>>>,
+    pub matrices: Option<IndexMap<String, Vec<BTreeMap<String, VariableValue>>>>,
     pub jobs: BTreeMap<String, GitlabJob>,
 }
 
 impl GitlabCi {
     pub fn insert_job(&mut self, name: String, job: GitlabJob) {
         self.jobs.insert(name, job);
+    }
+
+    pub fn get_parallel_for_job(&self, job: &GitlabJob) -> Option<Vec<BTreeMap<String, VariableValue>>> {
+        if let Some(parallel) = &job.parallel {
+            if let ParallelField::Reference(parallel_reference) = parallel {
+                // Only first matrix is supported
+                if let Some(matrix_key) = parallel_reference.matrix.first() {
+                    if let Some(ret) = self.matrices.as_ref().and_then(|matrices| {
+                        matrices.get(matrix_key)
+                    }) {
+                        return Some(ret.clone());
+                    }
+                }
+            } else if let ParallelField::Matrix(parallel_values) = parallel {
+                return Some(parallel_values.matrix.clone());
+            }
+        }
+        None
     }
 
     pub fn collect_unresolved_extends(&self) -> HashSet<String> {
@@ -266,13 +284,15 @@ pub fn parse_gitlab_ci(yml_content: &str) -> GitlabCi {
                 } else {
                     match from_value::<GitlabJob>(value.clone()) {
                         Ok(job) => gitlab_ci.insert_job(key_str.to_owned(), job),
-                        Err(_) => match from_value::<Vec<IndexMap<String, VariableValue>>>(value.clone()) {
+                        Err(_) => match from_value::<Vec<BTreeMap<String, VariableValue>>>(value.clone()) {
                             Ok(matrix_vec) => {
-                                let mut matrices = IndexMap::new();
-                                for (i, matrix) in matrix_vec.into_iter().enumerate() {
-                                    matrices.insert(format!("{}_{}", key_str, i), matrix);
+                                if let Some(ref mut matrices) = gitlab_ci.matrices {
+                                    matrices.insert(key_str.to_owned(), matrix_vec);
+                                } else {
+                                    let mut matrices = IndexMap::new();
+                                    matrices.insert(key_str.to_owned(), matrix_vec);
+                                    gitlab_ci.matrices = Some(matrices);
                                 }
-                                gitlab_ci.matrices = Some(matrices);
                             }
                             Err(e) => {
                                 eprintln!("Failed to deserialize job or matrix: {}", e)

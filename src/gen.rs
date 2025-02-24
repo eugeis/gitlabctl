@@ -5,10 +5,10 @@ use crate::common::Result;
 use crate::gitlab::GroupNode;
 use crate::handler::Handler;
 
-use crate::ci_parser::{variables_as_string_fill, GitlabCi};
+use crate::ci_parser::{variables_as_string_fill, GitlabCi, GitlabJob, ParallelField, VariableValue};
 use include_dir::{include_dir, Dir};
 use lazy_static::lazy_static;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs::File;
 use tera::{Context, Tera};
 
@@ -120,56 +120,96 @@ impl GitlabCiScriptGenerator {
 
         if let Some(matrices) = &self.ci.matrices {
             // Generate script files for all defined jobs
-            for (matrix_name, variables) in matrices.iter() {
-                let mut context = Context::new();
-                context.insert("matrix_name", matrix_name);
-
-                let mut string_vars = Vec::new();
-                variables_as_string_fill(&mut string_vars, &variables);
-                context.insert("variables", &string_vars);
-
-                let target_file_path_buf = Path::new(&self.output_dir).join(format!("{}.sh", matrix_name));
-
-                let target_file =
-                    File::create(&target_file_path_buf).expect("Unable to create job file");
-
-                make_executable(&target_file_path_buf);
-
-                match TERA.render_to("ci/matrix.sh", &context, &target_file) {
-                    Err(e) => {
-                        println!("can't render file: {}", e);
-                    }
-                    _ => {
-                        println!("file generated: {:?}", &target_file_path_buf);
-                    }
-                };
+            for (matrix_name, matrix) in matrices.iter() {
+                for (index, variables) in matrix.iter().enumerate() {
+                    self.gen_matrix(&format!("{}_{}", matrix_name, index), &variables);
+                }
             }
         }
 
         // Generate script files for all defined jobs
         for (job_name, job) in self.ci.jobs.iter() {
-            let mut context = Context::new();
-            context.insert("job_name", job_name);
-            context.insert("job", job);
-            context.insert("is_template", &job_name.starts_with("."));
-            context.insert("variables", &job.variables_as_strings());
+            let matrix_name = format!("{}_matrix", job_name);
+            if let Some(parallel) = &job.parallel {
+                let (matrix_name, matrix_length) = if let ParallelField::Reference(reference) = parallel {
+                    // Only first matrix is supported for now
+                    let matrix_name = reference.matrix.first().unwrap();
+                    if let Some(matrix) = self.ci.matrices.as_ref().and_then(|matrices| {
+                        matrices.get(matrix_name)
+                    }) {
+                        (matrix_name.clone(), matrix.len())
+                    } else {
+                        (matrix_name.clone(), 0)
+                    }
+                } else if let ParallelField::Matrix(parallel_matrix) = parallel {
+                    let matrix_name = format!("{}_matrix", job_name);
+                    for (index, variables) in parallel_matrix.matrix.iter().enumerate() {
+                        self.gen_matrix(&format!("{}_{}", matrix_name, index), &variables);
+                    }
+                    (matrix_name, parallel_matrix.matrix.len())
+                } else {
+                    ("".to_string(), 0)
+                };
 
-            let target_file_path_buf = Path::new(&self.output_dir).join(format!("{}.sh", job_name));
-
-            let target_file =
-                File::create(&target_file_path_buf).expect("Unable to create job file");
-
-            make_executable(&target_file_path_buf);
-
-            match TERA.render_to("ci/job.sh", &context, &target_file) {
-                Err(e) => {
-                    println!("can't render file: {}", e);
+                for index in 0..matrix_length {
+                    let job_name_parallel = format!("{}_{}", job_name, index);
+                    self.gen_job(&job_name_parallel, job, format!("{}_{}", matrix_name, index).as_str());
                 }
-                _ => {
-                    println!("file generated: {:?}", &target_file_path_buf);
-                }
-            };
+            } else {
+                self.gen_job(&job_name, job, "");
+            }
         }
+    }
+
+    fn gen_matrix(&self, matrix_name: &String, matrix: &&BTreeMap<String, VariableValue>) {
+        let mut context = Context::new();
+        context.insert("matrix_name", &matrix_name);
+        context.insert("is_template", &true);
+
+        let mut string_vars = Vec::new();
+        variables_as_string_fill(&mut string_vars, &matrix);
+        context.insert("variables", &string_vars);
+
+        let target_file_path_buf = Path::new(&self.output_dir).join(format!("{}.sh", matrix_name));
+
+        let target_file =
+            File::create(&target_file_path_buf).expect("Unable to create job file");
+
+        make_executable(&target_file_path_buf);
+
+        match TERA.render_to("ci/matrix.sh", &context, &target_file) {
+            Err(e) => {
+                println!("can't render file: {}", e);
+            }
+            _ => {
+                println!("file generated: {:?}", &target_file_path_buf);
+            }
+        };
+    }
+
+    fn gen_job(&self, job_name: &str, job: &GitlabJob, parallel: &str) {
+        let mut context = Context::new();
+        context.insert("job_name", job_name);
+        context.insert("job", job);
+        context.insert("is_template", &job_name.starts_with("."));
+        context.insert("variables", &job.variables_as_strings());
+        context.insert("parallel", &parallel);
+
+        let target_file_path_buf = Path::new(&self.output_dir).join(format!("{}.sh", job_name));
+
+        let target_file =
+            File::create(&target_file_path_buf).expect("Unable to create job file");
+
+        make_executable(&target_file_path_buf);
+
+        match TERA.render_to("ci/job.sh", &context, &target_file) {
+            Err(e) => {
+                println!("can't render file: {}", e);
+            }
+            _ => {
+                println!("file generated: {:?}", &target_file_path_buf);
+            }
+        };
     }
 }
 
